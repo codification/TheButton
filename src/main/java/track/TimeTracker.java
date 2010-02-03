@@ -6,9 +6,12 @@
  */
 package track;
 
+import org.apache.commons.collections.Closure;
+import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,31 +27,81 @@ public class TimeTracker {
     }
 
     public Duration sumUpToday() {
-        return sumUpDay(clock.now());
-    }
-
-    private Duration durationBetweenTicks(Instant start, Instant end) {
-        return new Interval(start, end).toDuration();
+        return sumUpDay(new LocalDate(clock.now()));
     }
 
     public void tick() {
         ticks.add(clock.now());
     }
 
-    public Duration sumUpDay(Instant day) {
+    public Duration sumUpDay(LocalDate date) {
         Duration soFar = Duration.ZERO;
+        final LinkedList<Interval> todaysIntervals = new LinkedList<Interval>();
+        iterateIntervals(new IntervalsInADay(date, todaysIntervals));
+        final AddIntervalDurations closure = new AddIntervalDurations();
+        CollectionUtils.forAllDo(todaysIntervals, closure);
+        return closure.result();
+    }
+
+    protected void iterateIntervals(Closure closure) {
         final Iterator<Instant> iterator = ticks.iterator();
         while (iterator.hasNext()) {
             final Instant startTick = iterator.next();
-            final Instant endTick = (iterator.hasNext())? iterator.next() : startTick;
-            if (isSameDay(day, startTick)) {
-                soFar = soFar.plus(durationBetweenTicks(startTick, endTick));
+            if (iterator.hasNext()) {
+                final Instant endTick = iterator.next();
+                closure.execute(new Interval(startTick, endTick));
             }
         }
-        return soFar;
     }
 
-    private boolean isSameDay(Instant day1, Instant day2) {
-        return day2.toDateTime().dayOfYear().equals(day1.toDateTime().dayOfYear());
+    private Duration eligibleDuration(LocalDate date, Interval interval) {
+        Duration duration = Duration.ZERO;
+        if (date.toInterval().contains(interval)) {
+            duration = interval.toDuration();
+        }
+        return duration;
+    }
+
+    public Periods periodsToday() {
+        final LocalDate today = new LocalDate(clock.now());
+        final Collection<Interval> intervals = new LinkedList<Interval>();
+        iterateIntervals(new IntervalsInADay(today, intervals));
+        return new Periods(intervals);
+    }
+
+    private static class IntervalsInADay implements Closure {
+        private final LocalDate day;
+        private final Collection<Interval> intervals;
+
+        public IntervalsInADay(LocalDate day, Collection<Interval> intervals) {
+            this.day = day;
+            this.intervals = intervals;
+        }
+
+        @Override
+        public void execute(Object input) {
+            final Interval interval = (Interval) input;
+            if (day.toInterval().contains(interval)) {
+                intervals.add(interval);
+            }
+        }
+    }
+
+    private static class AddIntervalDurations implements Closure {
+        private Duration soFar;
+
+        public AddIntervalDurations() {
+            this.soFar = Duration.ZERO;
+        }
+
+        @Override
+        public void execute(Object input) {
+            Interval interval = (Interval) input;
+            soFar = soFar.plus(interval.toDuration());
+        }
+
+        public Duration result() {
+            return soFar;
+        }
     }
 }

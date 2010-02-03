@@ -7,6 +7,7 @@
 package track;
 
 import org.joda.time.Duration;
+import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -16,19 +17,30 @@ import static org.joda.time.Duration.standardDays;
 import static org.joda.time.Duration.standardHours;
 import static org.joda.time.Duration.standardMinutes;
 
-public class TimeTrackTest {
+public class TimeTrackBehaviour {
     private TimeTracker tracker;
     private TestingClock clock;
 
     @Test
     public void noTimeTrackedWhenNotTicked() {
-        assertThat(tracker.sumUpToday(), is(Duration.ZERO));
+        assertTodaysDuration(Duration.ZERO);
+        final int periodCount = 0;
+        assertPeriodsCount(periodCount);
+    }
+
+    private void assertPeriodsCount(int periodCount) {
+        assertThat(tracker.periodsToday().count(), is(periodCount));
+    }
+
+    private void assertTodaysDuration(Duration zero) {
+        assertThat(tracker.sumUpToday(), is(zero));
     }
 
     @Test
     public void noTimeTrackedForOneTick() {
         tracker.tick();
-        assertThat(tracker.sumUpToday(), is(Duration.ZERO));
+        assertTodaysDuration(Duration.ZERO);
+        assertPeriodsCount(0);
     }
 
     @Test
@@ -36,7 +48,8 @@ public class TimeTrackTest {
         tracker.tick();
         clock.advance(standardHours(1));
         tracker.tick();
-        assertThat(tracker.sumUpToday(), is(standardHours(1)));
+        assertTodaysDuration(standardHours(1));
+        assertPeriodsCount(1);
     }
 
     @Test
@@ -47,7 +60,8 @@ public class TimeTrackTest {
         tracker.tick();
         clock.advance(standardMinutes(30));
         tracker.tick();
-        assertThat(tracker.sumUpToday(), is(standardHours(2)));
+        assertTodaysDuration(standardHours(2));
+        assertPeriodsCount(2);
     }
 
     @Test
@@ -59,8 +73,8 @@ public class TimeTrackTest {
         tracker.tick();
         clock.advance(standardHours(1));
         tracker.tick();
-        assertThat(tracker.sumUpDay(clock.now()), is(standardHours(1)));
-        assertThat(tracker.sumUpDay(clock.now().minus(standardDays(1))), is(standardHours(2)));
+        assertThat(tracker.sumUpDay(new LocalDate(clock.now())), is(standardHours(1)));
+        assertThat(tracker.sumUpDay(new LocalDate(clock.now().minus(standardDays(1)))), is(standardHours(2)));
     }
 
     @BeforeMethod
