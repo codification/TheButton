@@ -35,7 +35,6 @@ public class TimeTracker {
     }
 
     public Duration sumUpDay(LocalDate date) {
-        Duration soFar = Duration.ZERO;
         final LinkedList<Interval> todaysIntervals = new LinkedList<Interval>();
         iterateIntervals(new IntervalsInADay(date, todaysIntervals));
         final AddIntervalDurations closure = new AddIntervalDurations();
@@ -54,16 +53,12 @@ public class TimeTracker {
         }
     }
 
-    private Duration eligibleDuration(LocalDate date, Interval interval) {
-        Duration duration = Duration.ZERO;
-        if (date.toInterval().contains(interval)) {
-            duration = interval.toDuration();
-        }
-        return duration;
-    }
-
     public Periods periodsToday() {
         final LocalDate today = new LocalDate(clock.now());
+        return periodsFor(today);
+    }
+
+    private Periods periodsFor(LocalDate today) {
         final Collection<Interval> intervals = new LinkedList<Interval>();
         iterateIntervals(new IntervalsInADay(today, intervals));
         return new Periods(intervals);
