@@ -7,7 +7,6 @@
 package track;
 
 import org.apache.commons.collections.Closure;
-import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
@@ -35,14 +34,10 @@ public class TimeTracker {
     }
 
     public Duration sumUpDay(LocalDate date) {
-        final LinkedList<Interval> todaysIntervals = new LinkedList<Interval>();
-        iterateIntervals(new IntervalsInADay(date, todaysIntervals));
-        final AddIntervalDurations closure = new AddIntervalDurations();
-        CollectionUtils.forAllDo(todaysIntervals, closure);
-        return closure.result();
+        return periodsFor(date).totalDuration();
     }
 
-    protected void iterateIntervals(Closure closure) {
+    private void iterateTicksAsIntervals(Closure closure, Collection<Instant> ticks) {
         final Iterator<Instant> iterator = ticks.iterator();
         while (iterator.hasNext()) {
             final Instant startTick = iterator.next();
@@ -58,9 +53,9 @@ public class TimeTracker {
         return periodsFor(today);
     }
 
-    private Periods periodsFor(LocalDate today) {
+    public Periods periodsFor(LocalDate date) {
         final Collection<Interval> intervals = new LinkedList<Interval>();
-        iterateIntervals(new IntervalsInADay(today, intervals));
+        iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
         return new Periods(intervals);
     }
 
@@ -82,21 +77,4 @@ public class TimeTracker {
         }
     }
 
-    private static class AddIntervalDurations implements Closure {
-        private Duration soFar;
-
-        public AddIntervalDurations() {
-            this.soFar = Duration.ZERO;
-        }
-
-        @Override
-        public void execute(Object input) {
-            Interval interval = (Interval) input;
-            soFar = soFar.plus(interval.toDuration());
-        }
-
-        public Duration result() {
-            return soFar;
-        }
-    }
 }

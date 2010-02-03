@@ -65,7 +65,7 @@ public class TimeTrackBehaviour {
     }
 
     @Test
-    public void trackDayOverlap() {
+    public void trackNiceDayOverlap() {
         tracker.tick();
         clock.advance(standardHours(2));
         tracker.tick();
