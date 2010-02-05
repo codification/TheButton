@@ -11,10 +11,13 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormatter;
 import thebutton.track.TimeTracker;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOError;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 public class ButtonFrame extends JFrame {
@@ -28,11 +31,16 @@ public class ButtonFrame extends JFrame {
         super(resources.getString(ButtonResources.BUTTON_FRAME_TITLE));
         this.resources = resources;
         this.timeTracker = timeTracker;
-        init();
+        try {
+            init();
+        } catch (IOException e) {
+            throw new IOError(e);
+        }
     }
 
-    protected void init() {
+    protected void init() throws IOException {
         setLayout(new BorderLayout());
+        setIconImage(ImageIO.read(getClass().getResourceAsStream("/img.png")));
 
         final Container buttonPanel = new JPanel();
         add(buttonPanel, BorderLayout.NORTH);
@@ -44,8 +52,6 @@ public class ButtonFrame extends JFrame {
         buttonPanel.add(button);
 
         track = createTrack();
-        track.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        track.setFillsViewportHeight(true);
         final JScrollPane scrollPane = new JScrollPane(track);
 
         trackPanel.add(scrollPane, BorderLayout.CENTER);
@@ -53,13 +59,15 @@ public class ButtonFrame extends JFrame {
     }
 
     private JTable createTrack() {
-        tracksModel = new IntervalsTableModel(timeTracker);
+        tracksModel = new IntervalsTableModel(resources,timeTracker);
         final JTable trackTable = new JTable(tracksModel);
         trackTable.setName("the.track");
+        trackTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        trackTable.setFillsViewportHeight(true);
         return trackTable;
     }
 
-    private JButton createTheButton() {
+    private JButton createTheButton() throws IOException {
         final JButton button = new JButton();
         final AbstractAction action = new AbstractAction() {
             @Override
@@ -70,8 +78,10 @@ public class ButtonFrame extends JFrame {
 
         button.setAction(action);
         button.setName("the.button");
-        button.setText(resources.getString(ButtonResources.BUTTON_BUTTON_TITLE));
-        button.setSize(200,75);
+        //button.setText(resources.getString(ButtonResources.BUTTON_BUTTON_TITLE));
+        button.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img.png"))));
+        button.setBackground(Color.WHITE);
+        button.setToolTipText(resources.getString("button.tooltip"));
         return button;
     }
 
@@ -81,9 +91,11 @@ public class ButtonFrame extends JFrame {
     }
 
     private static class IntervalsTableModel extends AbstractTableModel {
+        private final ResourceBundle resources;
         private final TimeTracker timeTracker;
 
-        public IntervalsTableModel(TimeTracker timeTracker) {
+        public IntervalsTableModel(ResourceBundle resources, TimeTracker timeTracker) {
+            this.resources = resources;
             this.timeTracker = timeTracker;
         }
 
@@ -95,6 +107,17 @@ public class ButtonFrame extends JFrame {
         @Override
         public int getColumnCount() {
             return 2;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            if (column == 0) {
+                return resources.getString("track.column.a");
+            }
+            else {
+                return resources.getString("track.column.b");
+            }
+
         }
 
         @Override
