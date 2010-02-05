@@ -8,6 +8,7 @@ package thebutton.swing;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormatter;
 import thebutton.track.TimeTracker;
 
 import javax.swing.*;
@@ -31,31 +32,24 @@ public class ButtonFrame extends JFrame {
     }
 
     protected void init() {
-        setLayout(new GridBagLayout());
-        final Container rootPanel = new JPanel();
-        rootPanel.setLayout(new GridBagLayout());
-        final GridBagConstraints rootConstraints = new GridBagConstraints();
-        rootConstraints.fill = GridBagConstraints.BOTH;
-        add(rootPanel, rootConstraints);
+        setLayout(new BorderLayout());
 
-        final GridBagConstraints constraints = new GridBagConstraints();
         final Container buttonPanel = new JPanel();
-        rootPanel.add(buttonPanel, constraints);
+        add(buttonPanel, BorderLayout.NORTH);
 
-        final Container trackPanel = new JPanel();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridy = 1;
-        rootPanel.add(trackPanel, constraints);
+        final Container trackPanel = new JPanel(new BorderLayout());
+        add(trackPanel, BorderLayout.CENTER);
 
         button = createTheButton();
         buttonPanel.add(button);
 
         track = createTrack();
+        track.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        track.setFillsViewportHeight(true);
         final JScrollPane scrollPane = new JScrollPane(track);
-        GridBagConstraints trackConstraints = new GridBagConstraints();
-        trackConstraints.fill = GridBagConstraints.BOTH;
-        trackConstraints.gridwidth = GridBagConstraints.REMAINDER;
-        trackPanel.add(scrollPane, constraints);
+
+        trackPanel.add(scrollPane, BorderLayout.CENTER);
+        pack();
     }
 
     private JTable createTrack() {
@@ -107,11 +101,15 @@ public class ButtonFrame extends JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             if (columnIndex == 0) {
                 final DateTime startingInstant = timeTracker.tracksToday().track(rowIndex).getStart();
-                return new LocalTime(startingInstant);
+                return toTimeString(startingInstant);
             } else {
                 final DateTime endingInstant = timeTracker.tracksToday().track(rowIndex).getEnd();
-                return new LocalTime(endingInstant);
+                return toTimeString(endingInstant);
             }
+        }
+
+        private String toTimeString(DateTime instant) {
+            return instant.toString("HH:mm:ss");
         }
 
     }
