@@ -4,7 +4,7 @@
  * @created 2 Feb, 2010
  * $Id$
  */
-package track;
+package thebutton.track;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;

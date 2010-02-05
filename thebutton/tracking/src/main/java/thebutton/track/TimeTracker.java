@@ -4,7 +4,7 @@
  * @created 2 Feb, 2010
  * $Id$
  */
-package track;
+package thebutton.track;
 
 import org.apache.commons.collections.Closure;
 import org.joda.time.Duration;
@@ -15,6 +15,7 @@ import org.joda.time.LocalDate;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TimeTracker {
     private final Clock clock;
@@ -34,7 +35,7 @@ public class TimeTracker {
     }
 
     public Duration sumUpDay(LocalDate date) {
-        return periodsFor(date).totalDuration();
+        return tracksFor(date).totalDuration();
     }
 
     private void iterateTicksAsIntervals(Closure closure, Collection<Instant> ticks) {
@@ -48,15 +49,15 @@ public class TimeTracker {
         }
     }
 
-    public Periods periodsToday() {
+    public Tracks tracksToday() {
         final LocalDate today = new LocalDate(clock.now());
-        return periodsFor(today);
+        return tracksFor(today);
     }
 
-    public Periods periodsFor(LocalDate date) {
-        final Collection<Interval> intervals = new LinkedList<Interval>();
+    public Tracks tracksFor(LocalDate date) {
+        final List<Interval> intervals = new LinkedList<Interval>();
         iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
-        return new Periods(intervals);
+        return new Tracks(intervals);
     }
 
     private static class IntervalsInADay implements Closure {
