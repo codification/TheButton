@@ -32,6 +32,7 @@ public class ButtonBehaviour {
         timeTracker = new TimeTracker(clock);
         resourceBundle = ButtonResources.lookupResources();
         ButtonFrame frame = GuiActionRunner.execute(new GuiQuery<ButtonFrame>() {
+            @Override
             protected ButtonFrame executeInEDT() {
                 return new ButtonFrame(resourceBundle, timeTracker);
             }
@@ -43,8 +44,6 @@ public class ButtonBehaviour {
 
     @Test
     public void findTheButton() {
-        final String buttonTitle = resourceBundle.getString(ButtonResources.BUTTON_BUTTON_TITLE);
-        theButton().requireText(buttonTitle);
         theButton().requireEnabled();
         theButton().requireFocused();
     }
@@ -64,6 +63,7 @@ public class ButtonBehaviour {
         theButton().click();
         theTracks().requireRowCount(0);
     }
+
     @Test
     public void twoClicksOnTheButton() {
         theButton().click();
