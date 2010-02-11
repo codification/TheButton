@@ -13,9 +13,7 @@ import org.testng.annotations.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.joda.time.Duration.standardDays;
-import static org.joda.time.Duration.standardHours;
-import static org.joda.time.Duration.standardMinutes;
+import static org.joda.time.Duration.*;
 
 public class TimeTrackBehaviour {
     private TimeTracker tracker;
@@ -75,6 +73,21 @@ public class TimeTrackBehaviour {
         tracker.tick();
         assertThat(tracker.sumUpDay(new LocalDate(clock.now())), is(standardHours(1)));
         assertThat(tracker.sumUpDay(new LocalDate(clock.now().minus(standardDays(1)))), is(standardHours(2)));
+    }
+
+    @Test
+    public void timeSinceStart() {
+        tracker.tick();
+        final Duration duration = Duration.standardSeconds(5);
+        clock.advance(duration);
+        assertThat(tracker.currentTrackLength(), is(duration));
+    }
+
+    @Test
+    public void noTimeWhenNoTick() {
+        final Duration duration = Duration.standardSeconds(5);
+        clock.advance(duration);
+        assertThat(tracker.currentTrackLength(), is(Duration.ZERO));
     }
 
     @BeforeMethod

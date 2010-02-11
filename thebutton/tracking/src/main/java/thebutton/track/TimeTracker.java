@@ -12,14 +12,11 @@ import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class TimeTracker {
     private final Clock clock;
-    private Collection<Instant> ticks;
+    private Deque<Instant> ticks;
 
     public TimeTracker(Clock clock) {
         this.clock = clock;
@@ -58,6 +55,22 @@ public class TimeTracker {
         final List<Interval> intervals = new LinkedList<Interval>();
         iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
         return new Tracks(intervals);
+    }
+
+    public Duration currentTrackLength() {
+        if (!isIdle()) {
+            return new Interval(ticks.getLast(), clock.now()).toDuration();
+        } else {
+            return Duration.ZERO;
+        }
+    }
+
+    public boolean isIdle() {
+        return ticks.size() % 2 == 0;
+    }
+
+    public boolean isTracking() {
+        return !isIdle();
     }
 
     private static class IntervalsInADay implements Closure {

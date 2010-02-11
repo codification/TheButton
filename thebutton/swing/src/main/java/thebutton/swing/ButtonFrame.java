@@ -7,8 +7,10 @@
 package thebutton.swing;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.PeriodType;
+import org.joda.time.ReadableDateTime;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 import thebutton.track.TimeTracker;
 
 import javax.imageio.ImageIO;
@@ -16,6 +18,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOError;
 import java.io.IOException;
 import java.util.ResourceBundle;
@@ -23,14 +26,30 @@ import java.util.ResourceBundle;
 public class ButtonFrame extends JFrame {
     private ResourceBundle resources;
     private final TimeTracker timeTracker;
-    private JTable track;
     private JButton button;
     private IntervalsTableModel tracksModel;
+    private PeriodFormatter runningTrackFormatter;
+    private Timer timer;
 
     public ButtonFrame(ResourceBundle resources, TimeTracker timeTracker) throws HeadlessException {
         super(resources.getString(ButtonResources.BUTTON_FRAME_TITLE));
         this.resources = resources;
         this.timeTracker = timeTracker;
+        runningTrackFormatter = new PeriodFormatterBuilder()
+                .printZeroAlways()
+                .appendHours()
+                .appendSuffix("h:")
+                .appendMinutes()
+                .appendSuffix("m:")
+                .appendSeconds()
+                .appendSuffix("s")
+                .toFormatter();
+        timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateButtonText();
+            }
+        });
         try {
             init();
         } catch (IOException e) {
@@ -51,15 +70,24 @@ public class ButtonFrame extends JFrame {
         button = createTheButton();
         buttonPanel.add(button);
 
-        track = createTrack();
-        final JScrollPane scrollPane = new JScrollPane(track);
+        JTable track = createTrack();
+        final Component scrollPane = new JScrollPane(track);
 
         trackPanel.add(scrollPane, BorderLayout.CENTER);
         pack();
+
+        timer.start();
+    }
+
+    public void updateButtonText() {
+        if (timeTracker.isTracking()) {
+            button.setText(timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(runningTrackFormatter));
+            button.repaint();
+        }
     }
 
     private JTable createTrack() {
-        tracksModel = new IntervalsTableModel(resources,timeTracker);
+        tracksModel = new IntervalsTableModel(resources, timeTracker);
         final JTable trackTable = new JTable(tracksModel);
         trackTable.setName("the.track");
         trackTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -69,7 +97,7 @@ public class ButtonFrame extends JFrame {
 
     private JButton createTheButton() throws IOException {
         final JButton button = new JButton();
-        final AbstractAction action = new AbstractAction() {
+        final Action action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 buttonPushed();
@@ -78,9 +106,9 @@ public class ButtonFrame extends JFrame {
 
         button.setAction(action);
         button.setName("the.button");
-        //button.setText(resources.getString(ButtonResources.BUTTON_BUTTON_TITLE));
-        button.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img.png"))));
-        button.setBackground(Color.WHITE);
+        button.setText(resources.getString(ButtonResources.BUTTON_BUTTON_IDLE));
+        //button.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img.png"))));
+        //button.setBackground(Color.WHITE);
         button.setToolTipText(resources.getString("button.tooltip"));
         return button;
     }
@@ -113,8 +141,7 @@ public class ButtonFrame extends JFrame {
         public String getColumnName(int column) {
             if (column == 0) {
                 return resources.getString("track.column.a");
-            }
-            else {
+            } else {
                 return resources.getString("track.column.b");
             }
 
@@ -131,7 +158,7 @@ public class ButtonFrame extends JFrame {
             }
         }
 
-        private String toTimeString(DateTime instant) {
+        private String toTimeString(ReadableDateTime instant) {
             return instant.toString("HH:mm:ss");
         }
 
