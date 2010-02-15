@@ -1,9 +1,16 @@
-/**
- * Purpose
- * @author aavisv
- * @created 4 Feb, 2010
- * $Id$
+/*
+ * Copyright (c) 2010, Ville Svärd
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package thebutton.swing;
 
 import org.joda.time.DateTime;
@@ -23,33 +30,38 @@ import java.io.IOError;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+
 public class ButtonFrame extends JFrame {
     private ResourceBundle resources;
     private final TimeTracker timeTracker;
-    private JButton button;
     private IntervalsTableModel tracksModel;
-    private PeriodFormatter runningTrackFormatter;
-    private Timer timer;
+    private JButton button;
+    private JTextField sinceStarted;
+    private static final PeriodFormatter PERIOD_FORMATTER_BUILDER_MINUTES = new PeriodFormatterBuilder()
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendHours()
+            .appendSuffix("h:")
+            .appendMinutes()
+            .appendSuffix("m")
+            .toFormatter();
+    private static final PeriodFormatter PERIOD_FORMATTER_BUILDER_SECONDS = new PeriodFormatterBuilder()
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendHours()
+            .appendSuffix("h:")
+            .appendMinutes()
+            .appendSuffix("m:")
+            .appendSeconds()
+            .appendSuffix("s")
+            .toFormatter();
 
-    public ButtonFrame(ResourceBundle resources, TimeTracker timeTracker) throws HeadlessException {
+    public ButtonFrame(ResourceBundle resources, TimeTracker timeTracker, Timer timer) throws HeadlessException {
         super(resources.getString(ButtonResources.BUTTON_FRAME_TITLE));
         this.resources = resources;
         this.timeTracker = timeTracker;
-        runningTrackFormatter = new PeriodFormatterBuilder()
-                .printZeroAlways()
-                .appendHours()
-                .appendSuffix("h:")
-                .appendMinutes()
-                .appendSuffix("m:")
-                .appendSeconds()
-                .appendSuffix("s")
-                .toFormatter();
-        timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateButtonText();
-            }
-        });
+        timer.addActionListener(updateAction());
+
         try {
             init();
         } catch (IOException e) {
@@ -57,33 +69,56 @@ public class ButtonFrame extends JFrame {
         }
     }
 
+    private ActionListener updateAction() {
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTime();
+            }
+        };
+        return actionListener;
+    }
+
+
     protected void init() throws IOException {
         setLayout(new BorderLayout());
         setIconImage(ImageIO.read(getClass().getResourceAsStream("/img.png")));
 
-        final Container buttonPanel = new JPanel();
+        final Container buttonPanel = new JPanel(new BorderLayout());
         add(buttonPanel, BorderLayout.NORTH);
+
+        button = createTheButton();
+        buttonPanel.add(button, BorderLayout.CENTER);
+
+        JPanel fieldsPanel = new JPanel();
+        buttonPanel.add(fieldsPanel, BorderLayout.SOUTH);
+        fieldsPanel.add(new JLabel(resources.getString("button.total.sinceStart.title")));
+        sinceStarted = new JTextField(8);
+        sinceStarted.setName("sum.fromStart");
+        fieldsPanel.add(sinceStarted);
 
         final Container trackPanel = new JPanel(new BorderLayout());
         add(trackPanel, BorderLayout.CENTER);
-
-        button = createTheButton();
-        buttonPanel.add(button);
 
         JTable track = createTrack();
         final Component scrollPane = new JScrollPane(track);
 
         trackPanel.add(scrollPane, BorderLayout.CENTER);
+
         pack();
 
-        timer.start();
     }
 
-    public void updateButtonText() {
+    public void updateTime() {
         if (timeTracker.isTracking()) {
-            button.setText(timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(runningTrackFormatter));
-            button.repaint();
+            button.setText(timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_BUILDER_SECONDS));
         }
+        else {
+            button.setText(resources.getString("button.button.title.idle"));
+        }
+        button.repaint();
+        sinceStarted.setText(timeTracker.sinceStarted().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_BUILDER_MINUTES));
+        sinceStarted.repaint();
     }
 
     private JTable createTrack() {
@@ -101,14 +136,13 @@ public class ButtonFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 buttonPushed();
+                updateTime();
             }
         };
 
         button.setAction(action);
         button.setName("the.button");
         button.setText(resources.getString(ButtonResources.BUTTON_BUTTON_IDLE));
-        //button.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img.png"))));
-        //button.setBackground(Color.WHITE);
         button.setToolTipText(resources.getString("button.tooltip"));
         return button;
     }
@@ -140,9 +174,9 @@ public class ButtonFrame extends JFrame {
         @Override
         public String getColumnName(int column) {
             if (column == 0) {
-                return resources.getString("track.column.a");
+                return resources.getString("button.track.column.a");
             } else {
-                return resources.getString("track.column.b");
+                return resources.getString("button.track.column.b");
             }
 
         }
@@ -152,7 +186,8 @@ public class ButtonFrame extends JFrame {
             if (columnIndex == 0) {
                 final DateTime startingInstant = timeTracker.tracksToday().track(rowIndex).getStart();
                 return toTimeString(startingInstant);
-            } else {
+            }
+            else {
                 final DateTime endingInstant = timeTracker.tracksToday().track(rowIndex).getEnd();
                 return toTimeString(endingInstant);
             }

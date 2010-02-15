@@ -10,6 +10,14 @@
 
     <name>The Button (Root)</name>
 
+    <licenses>
+        <license>
+            <name>New BSD License</name>
+            <url>http://www.opensource.org/licenses/bsd-license.php</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+
     <modules>
         <module>swing</module>
         <module>tracking</module>
