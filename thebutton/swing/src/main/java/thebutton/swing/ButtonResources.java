@@ -13,6 +13,9 @@
 
 package thebutton.swing;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 public class ButtonResources {
@@ -21,5 +24,33 @@ public class ButtonResources {
 
     public static ResourceBundle lookupResources() {
         return ResourceBundle.getBundle("resources");
+    }
+
+    public static String idle(ResourceBundle resources) {
+        return resources.getString(BUTTON_BUTTON_IDLE);
+    }
+
+    public static String frameTitle(ResourceBundle resources) {
+        return resources.getString(BUTTON_FRAME_TITLE);
+    }
+
+    public static String formTitle(String leading, String trailing) {
+        return leading + " - " + trailing;
+    }
+
+    public static String sinceStartedTitle(ResourceBundle resources) {
+        return resources.getString("button.total.sinceStart.title");
+    }
+
+    public static String buttonTooltip(ResourceBundle resources) {
+        return resources.getString("button.tooltip");
+    }
+
+    static String column(ResourceBundle resources, String column) {
+        return resources.getString("button.track.column." + column);
+    }
+
+    static BufferedImage appIconImage() throws IOException {
+        return ImageIO.read(ButtonResources.class.getResourceAsStream("/img.png"));
     }
 }
