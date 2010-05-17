@@ -37,27 +37,37 @@ public class ButtonFrame extends JFrame {
     private IntervalsTableModel tracksModel;
     private JButton button;
     private JTextField sinceStarted;
-    private static final PeriodFormatter PERIOD_FORMATTER_BUILDER_MINUTES = new PeriodFormatterBuilder()
-            .printZeroAlways()
-            .minimumPrintedDigits(2)
-            .appendHours()
-            .appendSuffix("h:")
-            .appendMinutes()
-            .appendSuffix("m")
-            .toFormatter();
-    private static final PeriodFormatter PERIOD_FORMATTER_BUILDER_SECONDS = new PeriodFormatterBuilder()
-            .printZeroAlways()
-            .minimumPrintedDigits(2)
-            .appendHours()
-            .appendSuffix("h:")
-            .appendMinutes()
-            .appendSuffix("m:")
-            .appendSeconds()
-            .appendSuffix("s")
-            .toFormatter();
+
+    private static final PeriodFormatter PERIOD_FORMATTER_MINUTES;
+    private static final PeriodFormatter PERIOD_FORMATTER_SECONDS;
+
+    static {
+        PeriodFormatterBuilder formatterBuilder = new PeriodFormatterBuilder()
+                .printZeroAlways()
+                .minimumPrintedDigits(2)
+                .appendHours()
+                .appendSuffix("h")
+                .appendSeparator(":")
+                .appendMinutes()
+                .appendSuffix("m");
+        PERIOD_FORMATTER_MINUTES = formatterBuilder.toFormatter();
+        formatterBuilder = new PeriodFormatterBuilder()
+                .printZeroAlways()
+                .minimumPrintedDigits(2)
+                .appendHours()
+                .appendSuffix("h")
+                .appendSeparator(":")
+                .appendMinutes()
+                .appendSuffix("m");
+        PERIOD_FORMATTER_SECONDS = formatterBuilder
+                .appendSeparator(":")
+                .appendSeconds()
+                .appendSuffix("s")
+                .toFormatter();
+    }
 
     public ButtonFrame(ResourceBundle resources, TimeTracker timeTracker, Timer timer) throws HeadlessException {
-        super(resources.getString(ButtonResources.BUTTON_FRAME_TITLE));
+        super("");
         this.resources = resources;
         this.timeTracker = timeTracker;
         timer.addActionListener(updateAction());
@@ -67,6 +77,24 @@ public class ButtonFrame extends JFrame {
         } catch (IOException e) {
             throw new IOError(e);
         }
+        updateTitle(resources);
+    }
+
+    private void updateTitle(ResourceBundle resources) {
+        setTitle(title(resources));
+    }
+
+    private String title(ResourceBundle resources) {
+        if (timeTracker.isIdle()) {
+            return formTitle(resources.getString(ButtonResources.BUTTON_FRAME_TITLE), resources.getString(ButtonResources.BUTTON_BUTTON_IDLE));
+        } else {
+            return formTitle(resources.getString(ButtonResources.BUTTON_FRAME_TITLE), timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_MINUTES));
+        }
+
+    }
+
+    private String formTitle(String leading, String trailing) {
+        return leading + " - " + trailing;
     }
 
     private ActionListener updateAction() {
@@ -111,14 +139,14 @@ public class ButtonFrame extends JFrame {
 
     public void updateTime() {
         if (timeTracker.isTracking()) {
-            button.setText(timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_BUILDER_SECONDS));
-        }
-        else {
+            button.setText(timeTracker.currentTrackLength().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_SECONDS));
+        } else {
             button.setText(resources.getString("button.button.title.idle"));
         }
         button.repaint();
-        sinceStarted.setText(timeTracker.sinceStarted().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_BUILDER_MINUTES));
+        sinceStarted.setText(timeTracker.sinceStarted().toPeriod(PeriodType.time()).toString(PERIOD_FORMATTER_MINUTES));
         sinceStarted.repaint();
+        updateTitle(resources);
     }
 
     private JTable createTrack() {
@@ -186,8 +214,7 @@ public class ButtonFrame extends JFrame {
             if (columnIndex == 0) {
                 final DateTime startingInstant = timeTracker.tracksToday().track(rowIndex).getStart();
                 return toTimeString(startingInstant);
-            }
-            else {
+            } else {
                 final DateTime endingInstant = timeTracker.tracksToday().track(rowIndex).getEnd();
                 return toTimeString(endingInstant);
             }

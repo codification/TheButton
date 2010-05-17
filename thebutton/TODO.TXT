@@ -1,0 +1,11 @@
+Bugs:
+
+Improvements:
+
+Features:
+     - Add a (optional) subject/title to each track
+     - Save tracks
+     - Re-read saved tracks
+     - Configure filtering of tracks
+     - Configure track length (á la pomodoro)
+     - Add notification/blink when preconfigured track length is reached
