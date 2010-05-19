@@ -14,7 +14,8 @@
 package thebutton.swing;
 
 import org.joda.time.Duration;
-import thebutton.track.TimeStringFormatter;
+import thebutton.track.TickerTracker;
+import thebutton.track.TimeFormat;
 import thebutton.track.TimeTracker;
 
 import javax.swing.*;
@@ -23,21 +24,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOError;
 import java.io.IOException;
-import java.util.ResourceBundle;
-
-import static thebutton.swing.ButtonResources.*;
-
 
 public class ButtonFrame extends JFrame {
-    private ResourceBundle resources;
-    private final TimeTracker timeTracker;
+    private final TickerTracker timeTracker;
     private IntervalsTableModel tracksModel;
     private JButton button;
     private JTextField sinceStarted;
 
-    private final TimeStringFormatter timeStringFormatter = new TimeStringFormatter();
+    private final TimeFormat timeFormat = new TimeFormat();
+    private ButtonResources resources;
 
-    public ButtonFrame(ResourceBundle resources, TimeTracker timeTracker, Timer timer) throws HeadlessException {
+    public ButtonFrame(TickerTracker timeTracker, Timer timer, ButtonResources resources) throws HeadlessException {
         super("");
         this.resources = resources;
         this.timeTracker = timeTracker;
@@ -48,18 +45,14 @@ public class ButtonFrame extends JFrame {
         } catch (IOException e) {
             throw new IOError(e);
         }
-        updateTitle(resources);
+        setTitle(title(timeTracker));
     }
 
-    private void updateTitle(ResourceBundle resources) {
-        setTitle(title(resources));
-    }
-
-    private String title(ResourceBundle resources) {
+    private String title(TimeTracker timeTracker) {
         if (timeTracker.isIdle()) {
-            return formTitle(frameTitle(resources), idle(resources));
+            return resources.idleTitle();
         } else {
-            return formTitle(frameTitle(resources), timeStringFormatter.usingMinutes(timeTracker.currentTrackLength()));
+            return resources.runningTitle(timeFormat.usingMinutes(timeTracker.runningTime()));
         }
 
     }
@@ -76,7 +69,7 @@ public class ButtonFrame extends JFrame {
 
     protected void init() throws IOException {
         setLayout(new BorderLayout());
-        setIconImage(appIconImage());
+        setIconImage(resources.appIconImage());
 
         final Container buttonPanel = new JPanel(new BorderLayout());
         add(buttonPanel, BorderLayout.NORTH);
@@ -86,7 +79,7 @@ public class ButtonFrame extends JFrame {
 
         JPanel fieldsPanel = new JPanel();
         buttonPanel.add(fieldsPanel, BorderLayout.SOUTH);
-        fieldsPanel.add(new JLabel(ButtonResources.sinceStartedTitle(resources)));
+        fieldsPanel.add(new JLabel(resources.sinceStartedLabel()));
         sinceStarted = new JTextField(8);
         sinceStarted.setName("sum.fromStart");
         fieldsPanel.add(sinceStarted);
@@ -105,20 +98,20 @@ public class ButtonFrame extends JFrame {
 
     public void updateTime() {
         if (timeTracker.isTracking()) {
-            Duration duration = timeTracker.currentTrackLength();
-            button.setText(timeStringFormatter.usingSeconds(duration));
+            Duration duration = timeTracker.runningTime();
+            button.setText(timeFormat.usingSeconds(duration));
         } else {
-            button.setText(idle(resources));
+            button.setText(resources.idle());
         }
         button.repaint();
         Duration duration = timeTracker.sinceStarted();
-        sinceStarted.setText(timeStringFormatter.usingMinutes(duration));
+        sinceStarted.setText(timeFormat.usingMinutes(duration));
         sinceStarted.repaint();
-        updateTitle(resources);
+        setTitle(title(timeTracker));
     }
 
     private JTable createTracks() {
-        tracksModel = new IntervalsTableModel(resources, timeTracker, timeStringFormatter);
+        tracksModel = new IntervalsTableModel(resources, timeTracker, timeFormat);
         final JTable trackTable = new JTable(tracksModel);
         trackTable.setName("the.track");
         trackTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -138,8 +131,8 @@ public class ButtonFrame extends JFrame {
 
         button.setAction(action);
         button.setName("the.button");
-        button.setText(idle(resources));
-        button.setToolTipText(ButtonResources.buttonTooltip(resources));
+        button.setText(resources.idle());
+        button.setToolTipText(resources.buttonTooltip());
         return button;
     }
 

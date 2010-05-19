@@ -14,20 +14,27 @@
 package thebutton.swing;
 
 import thebutton.track.Clock;
-import thebutton.track.TimeTracker;
+import thebutton.track.TickerTracker;
 
 import javax.swing.*;
 
+import static thebutton.swing.ButtonResources.createResources;
+
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, IllegalAccessException, InstantiationException {
-        TimeTracker timeTracker = new TimeTracker(Clock.SYSTEMCLOCK);
+        TickerTracker timeTracker = new TickerTracker(Clock.SYSTEMCLOCK);
         Timer timer = new Timer(1000, null);
-        final ButtonFrame buttonFrame = new ButtonFrame(ButtonResources.lookupResources(), timeTracker, timer);
+        final ButtonFrame buttonFrame = createFrame(timeTracker, timer);
+        buttonFrame.setVisible(true);
+        timer.start();
+    }
+
+    public static ButtonFrame createFrame(TickerTracker timeTracker, Timer timer) {
+        final ButtonFrame buttonFrame = new ButtonFrame(timeTracker, timer, createResources());
         buttonFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         buttonFrame.pack();
         setLookAndFeel();
-        buttonFrame.setVisible(true);
-        timer.start();
+        return buttonFrame;
     }
 
     private static void setLookAndFeel() {

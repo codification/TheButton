@@ -21,36 +21,48 @@ import java.util.ResourceBundle;
 public class ButtonResources {
     public static final String BUTTON_FRAME_TITLE = "button.frame.title";
     public static final String BUTTON_BUTTON_IDLE = "button.button.title.idle";
+    private ResourceBundle resourceBundle;
+
+    public ButtonResources(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
 
     public static ResourceBundle lookupResources() {
         return ResourceBundle.getBundle("resources");
     }
 
-    public static String idle(ResourceBundle resources) {
-        return resources.getString(BUTTON_BUTTON_IDLE);
+    public String sinceStartedLabel() {
+        return resourceBundle.getString("button.total.sinceStart.title");
     }
 
-    public static String frameTitle(ResourceBundle resources) {
-        return resources.getString(BUTTON_FRAME_TITLE);
+    public String buttonTooltip() {
+        return resourceBundle.getString("button.tooltip");
     }
 
-    public static String formTitle(String leading, String trailing) {
-        return leading + " - " + trailing;
+    public String column(String column) {
+        return resourceBundle.getString("button.track.column." + column);
     }
 
-    public static String sinceStartedTitle(ResourceBundle resources) {
-        return resources.getString("button.total.sinceStart.title");
-    }
-
-    public static String buttonTooltip(ResourceBundle resources) {
-        return resources.getString("button.tooltip");
-    }
-
-    static String column(ResourceBundle resources, String column) {
-        return resources.getString("button.track.column." + column);
-    }
-
-    static BufferedImage appIconImage() throws IOException {
+    public BufferedImage appIconImage() throws IOException {
         return ImageIO.read(ButtonResources.class.getResourceAsStream("/img.png"));
+    }
+
+    public String idleTitle() {
+        return String.format("%s - %s",
+                resourceBundle.getString(BUTTON_FRAME_TITLE),
+                idle());
+    }
+
+    public String idle() {
+        return resourceBundle.getString("button.button.title.idle");
+    }
+
+    public String runningTitle(String time) {
+        return String.format("%s - %s",
+                resourceBundle.getString(BUTTON_FRAME_TITLE), time);
+    }
+
+    static ButtonResources createResources() {
+        return new ButtonResources(lookupResources());
     }
 }

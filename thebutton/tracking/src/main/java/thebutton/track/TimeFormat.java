@@ -8,7 +8,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.io.Serializable;
 
-public class TimeStringFormatter implements Serializable {
+public class TimeFormat implements Serializable {
     public static final PeriodFormatter PERIOD_FORMATTER_MINUTES;
     public static final PeriodFormatter PERIOD_FORMATTER_SECONDS;
 
@@ -37,7 +37,7 @@ public class TimeStringFormatter implements Serializable {
                 .toFormatter();
     }
 
-    public TimeStringFormatter() {
+    public TimeFormat() {
     }
 
     public String usingSeconds(Duration duration) {

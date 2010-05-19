@@ -11,7 +11,7 @@
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package thebutton.swing;
+package uitest;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
@@ -24,8 +24,11 @@ import org.joda.time.Duration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import thebutton.swing.ButtonFrame;
+import thebutton.swing.ButtonResources;
+import thebutton.swing.Main;
 import thebutton.track.TestingClock;
-import thebutton.track.TimeTracker;
+import thebutton.track.TickerTracker;
 
 import javax.swing.*;
 import java.util.ResourceBundle;
@@ -36,18 +39,18 @@ public class ButtonBehaviour {
     private FrameFixture window;
     private ResourceBundle resourceBundle;
     private TestingClock clock;
-    private TimeTracker timeTracker;
+    private TickerTracker timeTracker;
     private ButtonFrame frame;
 
     @BeforeMethod
     public void setUp() {
         clock = new TestingClock();
-        timeTracker = new TimeTracker(clock);
+        timeTracker = new TickerTracker(clock);
         resourceBundle = ButtonResources.lookupResources();
         frame = GuiActionRunner.execute(new GuiQuery<ButtonFrame>() {
             @Override
             protected ButtonFrame executeInEDT() {
-                return new ButtonFrame(resourceBundle, timeTracker, new Timer(1000, null));
+                return Main.createFrame(timeTracker, new Timer(1000, null));
             }
         });
         window = new FrameFixture(frame);

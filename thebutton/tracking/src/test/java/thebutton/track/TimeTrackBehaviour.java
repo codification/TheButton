@@ -1,16 +1,15 @@
-
 /*
- * Copyright (c) 2010, Ville Svärd
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+* Copyright (c) 2010, Ville Svärd
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+*
+*     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+*     * Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package thebutton.track;
 
@@ -24,7 +23,7 @@ import static org.hamcrest.core.Is.is;
 import static org.joda.time.Duration.*;
 
 public class TimeTrackBehaviour {
-    private TimeTracker tracker;
+    private TickerTracker tracker;
     private TestingClock clock;
     private Duration fiveMinutes;
     private Duration fiveSeconds;
@@ -37,7 +36,7 @@ public class TimeTrackBehaviour {
     }
 
     private void assertPeriodsCount(int periodCount) {
-        assertThat(tracker.tracksToday().count(), is(periodCount));
+        assertThat(tracker.todays().count(), is(periodCount));
     }
 
     private void assertTodaysDuration(Duration zero) {
@@ -89,7 +88,7 @@ public class TimeTrackBehaviour {
     public void currentTrackLength() {
         tracker.tick();
         clock.advance(fiveSeconds);
-        assertThat(tracker.currentTrackLength(), is(fiveSeconds));
+        assertThat(tracker.runningTime(), is(fiveSeconds));
     }
 
     @Test
@@ -103,6 +102,7 @@ public class TimeTrackBehaviour {
         clock.advance(fiveMinutes);
         assertThat(tracker.sinceStarted(), is(fiveMinutes));
     }
+
     @Test
     public void timeSinceStartOnTwoClicks() {
         tracker.tick();
@@ -115,13 +115,13 @@ public class TimeTrackBehaviour {
     @Test
     public void noTimeWhenNoTick() {
         clock.advance(fiveSeconds);
-        assertThat(tracker.currentTrackLength(), is(Duration.ZERO));
+        assertThat(tracker.runningTime(), is(Duration.ZERO));
     }
 
     @BeforeMethod
     protected void setUp() throws Exception {
         clock = new TestingClock();
-        tracker = new TimeTracker(clock);
+        tracker = new TickerTracker(clock);
         fiveMinutes = Duration.standardMinutes(5);
         fiveSeconds = Duration.standardSeconds(5);
     }

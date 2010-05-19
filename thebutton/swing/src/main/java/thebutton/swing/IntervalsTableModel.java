@@ -1,13 +1,10 @@
 package thebutton.swing;
 
 import org.joda.time.DateTime;
-import thebutton.track.TimeStringFormatter;
+import thebutton.track.TimeFormat;
 import thebutton.track.TimeTracker;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.ResourceBundle;
-
-import static thebutton.swing.ButtonResources.column;
 
 /**
  * TableModel for the "tracks" in the time tracker
@@ -16,11 +13,11 @@ import static thebutton.swing.ButtonResources.column;
  * @created: 2010-05-17 9:57:52 PM
  */
 class IntervalsTableModel extends AbstractTableModel {
-    private final ResourceBundle resources;
+    private final ButtonResources resources;
     private final TimeTracker timeTracker;
-    private TimeStringFormatter timeFormatter;
+    private TimeFormat timeFormatter;
 
-    public IntervalsTableModel(ResourceBundle resources, TimeTracker timeTracker, TimeStringFormatter timeFormatter) {
+    public IntervalsTableModel(ButtonResources resources, TimeTracker timeTracker, TimeFormat timeFormatter) {
         this.resources = resources;
         this.timeTracker = timeTracker;
         this.timeFormatter = timeFormatter;
@@ -28,7 +25,7 @@ class IntervalsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return timeTracker.tracksToday().count();
+        return timeTracker.todays().count();
     }
 
     @Override
@@ -39,9 +36,9 @@ class IntervalsTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         if (column == 0) {
-            return column(resources, "a");
+            return resources.column("a");
         } else {
-            return column(resources, "b");
+            return resources.column("b");
         }
 
     }
@@ -49,10 +46,10 @@ class IntervalsTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-            final DateTime startingInstant = timeTracker.tracksToday().track(rowIndex).getStart();
+            final DateTime startingInstant = timeTracker.todays().track(rowIndex).getStart();
             return timeFormatter.timeOfDay(startingInstant);
         } else {
-            final DateTime endingInstant = timeTracker.tracksToday().track(rowIndex).getEnd();
+            final DateTime endingInstant = timeTracker.todays().track(rowIndex).getEnd();
             return timeFormatter.timeOfDay(endingInstant);
         }
     }
