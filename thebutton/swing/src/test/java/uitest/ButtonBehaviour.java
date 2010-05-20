@@ -13,173 +13,83 @@
 
 package uitest;
 
-import org.fest.swing.edt.GuiActionRunner;
-import org.fest.swing.edt.GuiQuery;
-import org.fest.swing.edt.GuiTask;
-import org.fest.swing.fixture.FrameFixture;
-import org.fest.swing.fixture.JButtonFixture;
-import org.fest.swing.fixture.JTableFixture;
-import org.fest.swing.fixture.JTextComponentFixture;
-import org.joda.time.Duration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import thebutton.swing.ButtonFrame;
-import thebutton.swing.ButtonResources;
-import thebutton.swing.Main;
-import thebutton.track.TestingClock;
-import thebutton.track.TickerTracker;
-
-import javax.swing.*;
-import java.util.ResourceBundle;
-
-import static org.fest.assertions.Assertions.assertThat;
+import uitest.harness.ButtonApplicationTester;
 
 public class ButtonBehaviour {
-    private FrameFixture window;
-    private ResourceBundle resourceBundle;
-    private TestingClock clock;
-    private TickerTracker timeTracker;
-    private ButtonFrame frame;
+    private ButtonApplicationTester buttonApp;
 
     @BeforeMethod
     public void setUp() {
-        clock = new TestingClock();
-        timeTracker = new TickerTracker(clock);
-        resourceBundle = ButtonResources.lookupResources();
-        frame = GuiActionRunner.execute(new GuiQuery<ButtonFrame>() {
-            @Override
-            protected ButtonFrame executeInEDT() {
-                return Main.createFrame(timeTracker, new Timer(1000, null));
-            }
-        });
-        window = new FrameFixture(frame);
-        window.show(); // shows the frame to test
-
+        buttonApp = new ButtonApplicationTester();
     }
 
     @Test
-    public void hasAButtonLabeledIdle() {
-        theButton().requireEnabled();
-        theButton().requireFocused();
-        requireCaptionIsIdle();
+    public void hasAButtonLabeledIdleThatIsFocused() {
+        buttonApp.theButton().requireEnabled();
+        buttonApp.theButton().requireFocused();
+        buttonApp.requireCaptionIsIdle();
     }
 
     @Test
-    public void hasATableWithTwoColumns() {
-        theTracks().requireRowCount(0);
-        theTracks().requireColumnCount(2);
+    public void hasAnEmptyTableWithTwoColumns() {
+        buttonApp.requireTracks(0);
+        buttonApp.requireTrackColumns(2);
     }
 
-    private JTableFixture theTracks() {
-        return window.table("the.track");
-    }
-
-    @Test(dependsOnMethods = {"hasAButtonLabeledIdle", "hasATableWithTwoColumns"})
+    @Test
     public void noRowsForOneClickOnTheButton() {
-        clickTheButton();
-        theTracks().requireRowCount(0);
+        buttonApp.clickTheButton();
+        buttonApp.requireTracks(0);
     }
 
-    @Test(dependsOnMethods = {"hasAButtonLabeledIdle"})
+    @Test
     public void buttonTextChangesFromIdleAndBack() {
-        clickTheButton();
-        fiveSecondsPass();
-        frameTimeIsUpdated();
-        requireCaptionIsNotIdle();
-        clickTheButton();
-        requireCaptionIsIdle();
+        buttonApp.clickTheButton();
+        buttonApp.fiveSecondsPass();
+        buttonApp.requireCaptionIsNotIdle();
+        buttonApp.clickTheButton();
+        buttonApp.requireCaptionIsIdle();
 
     }
 
-    @Test(dependsOnMethods = {"hasAButtonLabeledIdle", "hasATableWithTwoColumns"})
+    @Test
     public void newRowAfterTwoClicksOnTheButton() {
-        clickTheButton();
-        oneHourPasses();
-        clickTheButton();
-        hasRows(1);
+        buttonApp.clickTheButton();
+        buttonApp.oneHourPasses();
+        buttonApp.clickTheButton();
+        buttonApp.hasRows(1);
     }
 
-    @Test(dependsOnMethods = {"hasAButtonLabeledIdle"})
+    @Test
     public void updatesTimeFromStart() {
-        requireTimeSinceStarted("");
-        clickTheButton();
-        oneHourPasses();
-        frameTimeIsUpdated();
-        String oneHour = "01h:00m";
-        requireTimeSinceStarted(oneHour);
-        clickTheButton();
-        oneHourPasses();
-        requireTimeSinceStarted(oneHour);
-        frameTimeIsUpdated();
-        requireTimeSinceStarted("02h:00m");
+        buttonApp.requireTimeSinceStarted("");
+        buttonApp.clickTheButton();
+        buttonApp.oneHourPasses();
+        buttonApp.requireTimeSinceStarted("01h:00m");
+        buttonApp.clickTheButton();
+        buttonApp.oneHourPasses();
+        buttonApp.requireTimeSinceStarted("02h:00m");
     }
 
     @Test
     public void windowTitleIsInitiallyIdle() throws Exception {
-        assertThat(window.component().getTitle()).isEqualTo("The Button - " + idleCaption());
+        String title = "The Button - " + buttonApp.idleCaption();
+        buttonApp.assertWindowTitle(title);
     }
 
     @Test
     public void windowTitleUpdatesWithRunningTrack() throws Exception {
-        clickTheButton();
-        oneHourPasses();
-        frameTimeIsUpdated();
-        assertThat(window.component().getTitle()).isEqualTo("The Button - " + "01h:00m");
-    }
-
-    private void requireCaptionIsNotIdle() {
-        assertThat(theButton().text()).isNotEqualTo(idleCaption());
-    }
-
-    private void requireCaptionIsIdle() {
-        theButton().requireText(idleCaption());
-    }
-
-    private void fiveSecondsPass() {
-        clock.advance(Duration.standardSeconds(5));
-    }
-
-    private String idleCaption() {
-        return resourceBundle.getString(ButtonResources.BUTTON_BUTTON_IDLE);
-    }
-
-
-    private void clickTheButton() {
-        theButton().click();
-    }
-
-    private void frameTimeIsUpdated() {
-        GuiActionRunner.execute(new GuiTask() {
-            @Override
-            protected void executeInEDT() throws Throwable {
-                frame.updateTime(); // Simulate a timer
-            }
-        });
-    }
-
-    private void hasRows(int noRows) {
-        theTracks().requireRowCount(noRows);
-    }
-
-    private void oneHourPasses() {
-        clock.advance(Duration.standardHours(1));
-    }
-
-    private void requireTimeSinceStarted(String time) {
-        sinceStartedField().requireText(time);
-    }
-
-    private JTextComponentFixture sinceStartedField() {
-        return window.textBox("sum.fromStart");
-    }
-
-    private JButtonFixture theButton() {
-        return window.button("the.button");
+        buttonApp.clickTheButton();
+        buttonApp.assertWindowTitle("The Button - " + "00h:00m");
+        buttonApp.oneHourPasses();
+        buttonApp.assertWindowTitle("The Button - " + "01h:00m");
     }
 
     @AfterMethod
     public void tearDown() {
-        window.cleanUp();
+        buttonApp.tearDown();
     }
 }

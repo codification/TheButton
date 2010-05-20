@@ -13,7 +13,6 @@
 
 package thebutton.swing;
 
-import org.joda.time.Duration;
 import thebutton.track.TickerTracker;
 import thebutton.track.TimeFormat;
 import thebutton.track.TimeTracker;
@@ -98,16 +97,23 @@ public class ButtonFrame extends JFrame {
 
     public void updateTime() {
         if (timeTracker.isTracking()) {
-            Duration duration = timeTracker.runningTime();
-            button.setText(timeFormat.usingSeconds(duration));
+            button.setText(runningTimeRepresentation());
         } else {
             button.setText(resources.idle());
         }
+        sinceStarted.setText(hoursAndMinutesSinceStarted());
+
         button.repaint();
-        Duration duration = timeTracker.sinceStarted();
-        sinceStarted.setText(timeFormat.usingMinutes(duration));
         sinceStarted.repaint();
         setTitle(title(timeTracker));
+    }
+
+    private String runningTimeRepresentation() {
+        return timeFormat.usingSeconds(timeTracker.runningTime());
+    }
+
+    private String hoursAndMinutesSinceStarted() {
+        return timeFormat.usingMinutes(timeTracker.sinceStarted());
     }
 
     private JTable createTracks() {

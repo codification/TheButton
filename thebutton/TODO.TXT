@@ -2,11 +2,14 @@ Bugs:
 
 Improvements:
      - Refactor!
+        - Time string formatting and tracks to be less cumbersome
+        - Eliminate the widespread dependencies on yoda time (should only be used by the core tracking func.)
+        
 
 Features:
      - Add a (optional) subject/title to each track
-     - Save tracks
+     - Save/Persist tracks
      - Re-read saved tracks
-     - Configure filtering of tracks
+     - Configure filtering of tracks (today, subject)
      - Configure track length (á la pomodoro)
      - Add notification/blink when preconfigured track length is reached
