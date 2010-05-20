@@ -18,6 +18,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import static java.lang.String.format;
+
 public class ButtonResources {
     public static final String BUTTON_FRAME_TITLE = "button.frame.title";
     public static final String BUTTON_BUTTON_IDLE = "button.button.title.idle";
@@ -39,8 +41,8 @@ public class ButtonResources {
         return resourceBundle.getString("button.tooltip");
     }
 
-    public String column(String column) {
-        return resourceBundle.getString("button.track.column." + column);
+    public String columnName(TrackTableColumn column) {
+        return resourceBundle.getString(format("button.track.column.%s", column.resourceKey()));
     }
 
     public BufferedImage appIconImage() throws IOException {
@@ -48,7 +50,7 @@ public class ButtonResources {
     }
 
     public String idleTitle() {
-        return String.format("%s - %s",
+        return format("%s - %s",
                 resourceBundle.getString(BUTTON_FRAME_TITLE),
                 idle());
     }
@@ -58,7 +60,7 @@ public class ButtonResources {
     }
 
     public String runningTitle(String time) {
-        return String.format("%s - %s",
+        return format("%s - %s",
                 resourceBundle.getString(BUTTON_FRAME_TITLE), time);
     }
 

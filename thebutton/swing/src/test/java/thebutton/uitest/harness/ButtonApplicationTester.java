@@ -1,4 +1,4 @@
-package uitest.harness;
+package thebutton.uitest.harness;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
@@ -112,12 +112,15 @@ public class ButtonApplicationTester {
         theTracks().requireRowCount(expected);
     }
 
-    public void requireTrackColumns(int expected) {
-        theTracks().requireColumnCount(expected);
-    }
-
     public void requireButtonFocused() {
         theButton().requireEnabled();
         theButton().requireFocused();
+    }
+
+    public void requireTrackColumns(String... columnNames) {
+        for (String columnName : columnNames) {
+            theTracks().columnIndexFor(columnName);
+        }
+
     }
 }

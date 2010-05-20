@@ -6,6 +6,9 @@ import thebutton.track.TimeTracker;
 
 import javax.swing.table.AbstractTableModel;
 
+import static thebutton.swing.TrackTableColumn.columnByNumber;
+import static thebutton.swing.TrackTableColumn.numberOfColumns;
+
 /**
  * TableModel for the "tracks" in the time tracker
  *
@@ -30,17 +33,12 @@ class IntervalsTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 2;
+        return numberOfColumns();
     }
 
     @Override
     public String getColumnName(int column) {
-        if (column == 0) {
-            return resources.column("a");
-        } else {
-            return resources.column("b");
-        }
-
+        return resources.columnName(columnByNumber(column));
     }
 
     @Override
