@@ -19,77 +19,76 @@ import org.testng.annotations.Test;
 import uitest.harness.ButtonApplicationTester;
 
 public class ButtonBehaviour {
-    private ButtonApplicationTester buttonApp;
+    private ButtonApplicationTester app;
 
     @BeforeMethod
     public void setUp() {
-        buttonApp = new ButtonApplicationTester();
+        app = new ButtonApplicationTester();
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        app.tearDown();
     }
 
     @Test
     public void hasAButtonLabeledIdleThatIsFocused() {
-        buttonApp.theButton().requireEnabled();
-        buttonApp.theButton().requireFocused();
-        buttonApp.requireCaptionIsIdle();
+        app.requireButtonFocused();
+        app.requireButtonCaptionIsIdle();
     }
 
     @Test
     public void hasAnEmptyTableWithTwoColumns() {
-        buttonApp.requireTracks(0);
-        buttonApp.requireTrackColumns(2);
+        app.requireTracks(0);
+        app.requireTrackColumns(2);
     }
 
     @Test
     public void noRowsForOneClickOnTheButton() {
-        buttonApp.clickTheButton();
-        buttonApp.requireTracks(0);
+        app.clickTheButton();
+        app.requireTracks(0);
     }
 
     @Test
     public void buttonTextChangesFromIdleAndBack() {
-        buttonApp.clickTheButton();
-        buttonApp.fiveSecondsPass();
-        buttonApp.requireCaptionIsNotIdle();
-        buttonApp.clickTheButton();
-        buttonApp.requireCaptionIsIdle();
+        app.clickTheButton();
+        app.fiveSecondsPass();
+        app.requireCaptionIsNotIdle();
+        app.clickTheButton();
+        app.requireButtonCaptionIsIdle();
 
     }
 
     @Test
     public void newRowAfterTwoClicksOnTheButton() {
-        buttonApp.clickTheButton();
-        buttonApp.oneHourPasses();
-        buttonApp.clickTheButton();
-        buttonApp.hasRows(1);
+        app.clickTheButton();
+        app.oneHourPasses();
+        app.clickTheButton();
+        app.hasRows(1);
     }
 
     @Test
     public void updatesTimeFromStart() {
-        buttonApp.requireTimeSinceStarted("");
-        buttonApp.clickTheButton();
-        buttonApp.oneHourPasses();
-        buttonApp.requireTimeSinceStarted("01h:00m");
-        buttonApp.clickTheButton();
-        buttonApp.oneHourPasses();
-        buttonApp.requireTimeSinceStarted("02h:00m");
+        app.requireTimeSinceStarted("");
+        app.clickTheButton();
+        app.oneHourPasses();
+        app.requireTimeSinceStarted("01h:00m");
+        app.clickTheButton();
+        app.oneHourPasses();
+        app.requireTimeSinceStarted("02h:00m");
     }
 
     @Test
     public void windowTitleIsInitiallyIdle() throws Exception {
-        String title = "The Button - " + buttonApp.idleCaption();
-        buttonApp.assertWindowTitle(title);
+        String title = "The Button - " + app.idleCaption();
+        app.assertWindowTitle(title);
     }
 
     @Test
     public void windowTitleUpdatesWithRunningTrack() throws Exception {
-        buttonApp.clickTheButton();
-        buttonApp.assertWindowTitle("The Button - " + "00h:00m");
-        buttonApp.oneHourPasses();
-        buttonApp.assertWindowTitle("The Button - " + "01h:00m");
-    }
-
-    @AfterMethod
-    public void tearDown() {
-        buttonApp.tearDown();
+        app.clickTheButton();
+        app.assertWindowTitle("The Button - " + "00h:00m");
+        app.oneHourPasses();
+        app.assertWindowTitle("The Button - " + "01h:00m");
     }
 }

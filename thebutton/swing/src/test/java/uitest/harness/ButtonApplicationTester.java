@@ -57,7 +57,7 @@ public class ButtonApplicationTester {
         assertThat(theButton().text()).isNotEqualTo(idleCaption());
     }
 
-    public void requireCaptionIsIdle() {
+    public void requireButtonCaptionIsIdle() {
         theButton().requireText(idleCaption());
     }
 
@@ -114,5 +114,10 @@ public class ButtonApplicationTester {
 
     public void requireTrackColumns(int expected) {
         theTracks().requireColumnCount(expected);
+    }
+
+    public void requireButtonFocused() {
+        theButton().requireEnabled();
+        theButton().requireFocused();
     }
 }
