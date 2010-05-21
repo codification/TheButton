@@ -14,4 +14,27 @@ public class TrackTaskBehaviour extends ButtonBehaviourBase {
         app.requireTrackColumns("Started", "Stopped", "Task");
     }
 
+    @Test
+    public void
+    taskNameInitiallyEmpty() {
+        app.requireTaskFieldEmpty();
+    }
+
+    @Test
+    public void
+    canEnterTaskName() throws Exception {
+        app.enterTaskName("have some fun");
+    }
+
+    @Test
+    public void
+    taskNameAppearsInTrackRowInTheCorrectColumn() throws Exception {
+        String task = "have some fun";
+        app.enterTaskName(task);
+        app.clickTheButton();
+        app.fiveSecondsPass();
+        app.clickTheButton();
+        app.requireTrackTask(0, task);
+    }
+
 }

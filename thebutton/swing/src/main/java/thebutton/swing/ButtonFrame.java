@@ -32,6 +32,7 @@ public class ButtonFrame extends JFrame {
 
     private final TimeFormat timeFormat = new TimeFormat();
     private ButtonResources resources;
+    private JTextField taskField;
 
     public ButtonFrame(TickerTracker timeTracker, Timer timer, ButtonResources resources) throws HeadlessException {
         super("");
@@ -76,12 +77,21 @@ public class ButtonFrame extends JFrame {
         button = createTheButton();
         buttonPanel.add(button, BorderLayout.CENTER);
 
-        JPanel fieldsPanel = new JPanel();
-        buttonPanel.add(fieldsPanel, BorderLayout.SOUTH);
-        fieldsPanel.add(new JLabel(resources.sinceStartedLabel()));
+        JPanel taskPanel = new JPanel();
+        JLabel taskLabel = new JLabel(resources.taskLabel());
+        taskLabel.setName("task.label");
+        taskPanel.add(taskLabel);
+        taskField = new JTextField(30);
+        taskField.setName("task.name");
+        taskPanel.add(taskField);
+
+        buttonPanel.add(taskPanel, BorderLayout.SOUTH);
+
+        JPanel sinceStartedPanel = new JPanel();
+        sinceStartedPanel.add(new JLabel(resources.sinceStartedLabel()));
         sinceStarted = new JTextField(8);
         sinceStarted.setName("sum.fromStart");
-        fieldsPanel.add(sinceStarted);
+        sinceStartedPanel.add(sinceStarted);
 
         final Container trackPanel = new JPanel(new BorderLayout());
         add(trackPanel, BorderLayout.CENTER);
@@ -90,6 +100,7 @@ public class ButtonFrame extends JFrame {
         final Component scrollPane = new JScrollPane(track);
 
         trackPanel.add(scrollPane, BorderLayout.CENTER);
+        trackPanel.add(sinceStartedPanel, BorderLayout.SOUTH);
 
         pack();
 
@@ -131,7 +142,6 @@ public class ButtonFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 buttonPushed();
-                updateTime();
             }
         };
 
@@ -143,8 +153,9 @@ public class ButtonFrame extends JFrame {
     }
 
     private void buttonPushed() {
-        timeTracker.tick();
+        timeTracker.tick(taskField.getText());
         tracksModel.fireTableDataChanged();
+        updateTime();
     }
 
 }

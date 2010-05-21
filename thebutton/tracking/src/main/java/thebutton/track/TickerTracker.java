@@ -29,11 +29,11 @@ import java.util.*;
 
 public class TickerTracker implements TimeTracker {
     private final Clock clock;
-    private Deque<Instant> ticks;
+    private Deque<ButtonTick> ticks;
 
     public TickerTracker(Clock clock) {
         this.clock = clock;
-        ticks = new LinkedList<Instant>();
+        ticks = new LinkedList<ButtonTick>();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class TickerTracker implements TimeTracker {
     }
 
     public void tick() {
-        ticks.add(clock.now());
+        ticks.add(new ButtonTick(clock.now()));
     }
 
     @Override
@@ -50,13 +50,13 @@ public class TickerTracker implements TimeTracker {
         return tracksFor(date).totalDuration();
     }
 
-    private void iterateTicksAsIntervals(Closure closure, Collection<Instant> ticks) {
-        final Iterator<Instant> iterator = ticks.iterator();
+    private void iterateTicksAsIntervals(Closure closure, Collection<ButtonTick> ticks) {
+        final Iterator<ButtonTick> iterator = ticks.iterator();
         while (iterator.hasNext()) {
-            final Instant startTick = iterator.next();
+            final Instant startTick = iterator.next().time();
             if (iterator.hasNext()) {
-                final Instant endTick = iterator.next();
-                closure.execute(new Interval(startTick, endTick));
+                ButtonTick endtick = iterator.next();
+                closure.execute(Track.start(startTick).doing(endtick.task()).stop(endtick.time()));
             }
         }
     }
@@ -69,17 +69,17 @@ public class TickerTracker implements TimeTracker {
 
     @Override
     public Tracks tracksFor(LocalDate date) {
-        final List<Interval> intervals = new LinkedList<Interval>();
+        final List<Track> intervals = new LinkedList<Track>();
         iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
         return new Tracks(intervals);
     }
 
     @Override
     public Duration runningTime() {
-        if (!isIdle()) {
-            return new Interval(ticks.getLast(), clock.now()).toDuration();
-        } else {
+        if (isIdle()) {
             return Duration.ZERO;
+        } else {
+            return new Interval(ticks.getLast().time(), clock.now()).toDuration();
         }
     }
 
@@ -98,26 +98,52 @@ public class TickerTracker implements TimeTracker {
         if (ticks.isEmpty()) {
             return Duration.ZERO;
         } else {
-            return new Interval(ticks.getFirst(), clock.now()).toDuration();
+            return new Interval(ticks.getFirst().time(), clock.now()).toDuration();
         }
+    }
+
+    public void tick(String taskname) {
+        ticks.add(new ButtonTick(clock.now(), taskname));
     }
 
     private static class IntervalsInADay implements Closure {
         private final LocalDate day;
-        private final Collection<Interval> intervals;
+        private final Collection<Track> intervals;
 
-        public IntervalsInADay(LocalDate day, Collection<Interval> intervals) {
+        public IntervalsInADay(LocalDate day, Collection<Track> intervals) {
             this.day = day;
             this.intervals = intervals;
         }
 
         @Override
         public void execute(Object input) {
-            final Interval interval = (Interval) input;
+            Track track = (Track) input;
+            final Interval interval = track.interval();
             if (day.toInterval().contains(interval)) {
-                intervals.add(interval);
+                intervals.add(track);
             }
         }
     }
 
+    private class ButtonTick {
+        private Instant instant;
+        private String task;
+
+        private ButtonTick(Instant instant) {
+            this(instant, "");
+        }
+
+        public ButtonTick(Instant instant, String taskname) {
+            this.instant = instant;
+            task = taskname;
+        }
+
+        public Instant time() {
+            return instant;
+        }
+
+        public String task() {
+            return task;
+        }
+    }
 }

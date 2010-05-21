@@ -1,12 +1,11 @@
 package thebutton.uitest.harness;
 
+import org.fest.swing.data.TableCellByColumnId;
+import org.fest.swing.data.TableCellFinder;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
 import org.fest.swing.edt.GuiTask;
-import org.fest.swing.fixture.FrameFixture;
-import org.fest.swing.fixture.JButtonFixture;
-import org.fest.swing.fixture.JTableFixture;
-import org.fest.swing.fixture.JTextComponentFixture;
+import org.fest.swing.fixture.*;
 import org.joda.time.Duration;
 import thebutton.swing.ButtonFrame;
 import thebutton.swing.ButtonResources;
@@ -122,5 +121,25 @@ public class ButtonApplicationTester {
             theTracks().columnIndexFor(columnName);
         }
 
+    }
+
+    public void requireTaskFieldEmpty() {
+        JLabelFixture taskLabel = window.label("task.label");
+        assertThat(taskLabel.text()).isNotEmpty();
+        assertThat(taskField().text()).isEmpty();
+    }
+
+    private JTextComponentFixture taskField() {
+        return window.textBox("task.name");
+    }
+
+    public void enterTaskName(String s) {
+        taskField().enterText(s);
+    }
+
+    public void requireTrackTask(int trackNumber, String task) {
+        TableCellFinder finder = TableCellByColumnId.row(trackNumber).columnId("Task");
+
+        assertThat(theTracks().cell(finder).value()).isEqualTo(task);
     }
 }

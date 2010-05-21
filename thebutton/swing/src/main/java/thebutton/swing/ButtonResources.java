@@ -67,4 +67,8 @@ public class ButtonResources {
     static ButtonResources createResources() {
         return new ButtonResources(lookupResources());
     }
+
+    public String taskLabel() {
+        return resourceBundle.getString("button.task.label");
+    }
 }

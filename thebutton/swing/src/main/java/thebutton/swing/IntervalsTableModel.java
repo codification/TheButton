@@ -3,6 +3,7 @@ package thebutton.swing;
 import org.joda.time.DateTime;
 import thebutton.track.TimeFormat;
 import thebutton.track.TimeTracker;
+import thebutton.track.Track;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -43,12 +44,15 @@ class IntervalsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        final Track track = timeTracker.todays().track(rowIndex);
         if (columnIndex == 0) {
-            final DateTime startingInstant = timeTracker.todays().track(rowIndex).getStart();
+            final DateTime startingInstant = track.start();
             return timeFormatter.timeOfDay(startingInstant);
-        } else {
-            final DateTime endingInstant = timeTracker.todays().track(rowIndex).getEnd();
+        } else if (columnIndex == 1) {
+            final DateTime endingInstant = track.stop();
             return timeFormatter.timeOfDay(endingInstant);
+        } else {
+            return track.task();
         }
     }
 

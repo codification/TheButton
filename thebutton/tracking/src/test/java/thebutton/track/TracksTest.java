@@ -18,30 +18,44 @@ import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class TracksTest {
     @Test
     public void zeroDurationForNoIntervals() {
-        final Tracks tracks = new Tracks(Collections.<Interval>emptyList());
+        final Tracks tracks = new Tracks(Collections.<Track>emptyList());
         assertThat(tracks.totalDuration(), is(Duration.ZERO));
     }
 
     @Test
     public void oneHourDurationForOneHourPeriod() {
-        final Tracks tracks = new Tracks(Collections.<Interval>singletonList(new Interval(Duration.standardHours(1), new Instant())));
-        assertThat(tracks.totalDuration(), is(Duration.standardHours(1)));
+        Duration duration = Duration.standardHours(1);
+        Interval interval = new Interval(duration, new Instant());
+        final Tracks tracks = new Tracks(Collections.<Track>singletonList(Track.start(interval.getStart().toInstant()).stop(interval.getEnd().toInstant())));
+        assertThat(tracks.totalDuration(), is(duration));
     }
+
     @Test
     public void oneHourDurationForTwo30MinPeriods() {
-        final Tracks tracks = new Tracks(Arrays.asList(
-                new Interval(Duration.standardMinutes(30), new Instant()),
-                new Interval(Duration.standardMinutes(30), new Instant().plus(Duration.standardHours(2)))));
+        Duration thirtyMins = Duration.standardMinutes(30);
+        Instant now = new Instant();
+        Duration later = Duration.standardHours(2);
+        Interval interval1 = new Interval(thirtyMins, now);
+        Interval interval2 = new Interval(thirtyMins, now.plus(later));
+        final Tracks tracks = new Tracks(asList(
+                Track.start(interval1.getStart().toInstant()).stop(interval1.getEnd().toInstant()),
+                Track.start(interval1.getStart().toInstant()).stop(interval1.getEnd().toInstant())));
         assertThat(tracks.totalDuration(), is(Duration.standardHours(1)));
     }
 
+    @Test
+    public void
+    createWithTracks() throws Exception {
+        Instant now = new Instant();
+        new Tracks(asList(Track.start(now.minus(Duration.standardSeconds(5))).stop(now)));
+    }
 }
