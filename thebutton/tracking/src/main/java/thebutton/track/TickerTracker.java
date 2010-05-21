@@ -27,13 +27,21 @@ import org.joda.time.LocalDate;
 
 import java.util.*;
 
+import static thebutton.track.Track.start;
+
 public class TickerTracker implements TimeTracker, Ticker {
     private final Clock clock;
     private Deque<ButtonTick> ticks;
+    private Tracks tracks;
 
     public TickerTracker(Clock clock) {
         this.clock = clock;
         ticks = new LinkedList<ButtonTick>();
+    }
+
+    public TickerTracker(Clock clock, Tracks tracks) {
+        this(clock);
+        this.tracks = tracks;
     }
 
     @Override
@@ -43,7 +51,11 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public void tick() {
-        ticks.add(new ButtonTick(clock.now()));
+        final Instant now = clock.now();
+        if (isTracking()) {
+            tracks.add(start(ticks.peekLast().time()).stop(now));
+        }
+        ticks.add(new ButtonTick(now));
     }
 
     @Override
@@ -57,7 +69,7 @@ public class TickerTracker implements TimeTracker, Ticker {
             final Instant startTick = iterator.next().time();
             if (iterator.hasNext()) {
                 ButtonTick endtick = iterator.next();
-                closure.execute(Track.start(startTick).doing(endtick.task()).stop(endtick.time()));
+                closure.execute(start(startTick).doing(endtick.task()).stop(endtick.time()));
             }
         }
     }
@@ -72,7 +84,7 @@ public class TickerTracker implements TimeTracker, Ticker {
     public Tracks tracksFor(LocalDate date) {
         final List<Track> intervals = new LinkedList<Track>();
         iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
-        return new Tracks(intervals);
+        return new TracksList(intervals);
     }
 
     @Override
@@ -105,7 +117,11 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public void tick(String taskname) {
-        ticks.add(new ButtonTick(clock.now(), taskname));
+        final Instant now = clock.now();
+        if (isTracking()) {
+            tracks.add(start(ticks.peekLast().time()).doing(taskname).stop(now));
+        }
+        ticks.add(new ButtonTick(now, taskname));
     }
 
     private static class IntervalsInADay implements Closure {

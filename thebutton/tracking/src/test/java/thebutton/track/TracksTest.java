@@ -27,7 +27,7 @@ import static org.hamcrest.core.Is.is;
 public class TracksTest {
     @Test
     public void zeroDurationForNoIntervals() {
-        final Tracks tracks = new Tracks(Collections.<Track>emptyList());
+        final Tracks tracks = new TracksList(Collections.<Track>emptyList());
         assertThat(tracks.totalDuration(), is(Duration.ZERO));
     }
 
@@ -35,7 +35,7 @@ public class TracksTest {
     public void oneHourDurationForOneHourPeriod() {
         Duration duration = Duration.standardHours(1);
         Interval interval = new Interval(duration, new Instant());
-        final Tracks tracks = new Tracks(Collections.<Track>singletonList(Track.start(interval.getStart().toInstant()).stop(interval.getEnd().toInstant())));
+        final Tracks tracks = new TracksList(Collections.<Track>singletonList(Track.start(interval.getStart().toInstant()).stop(interval.getEnd().toInstant())));
         assertThat(tracks.totalDuration(), is(duration));
     }
 
@@ -46,7 +46,7 @@ public class TracksTest {
         Duration later = Duration.standardHours(2);
         Interval interval1 = new Interval(thirtyMins, now);
         Interval interval2 = new Interval(thirtyMins, now.plus(later));
-        final Tracks tracks = new Tracks(asList(
+        final Tracks tracks = new TracksList(asList(
                 Track.start(interval1.getStart().toInstant()).stop(interval1.getEnd().toInstant()),
                 Track.start(interval1.getStart().toInstant()).stop(interval1.getEnd().toInstant())));
         assertThat(tracks.totalDuration(), is(Duration.standardHours(1)));
@@ -56,6 +56,6 @@ public class TracksTest {
     public void
     createWithTracks() throws Exception {
         Instant now = new Instant();
-        new Tracks(asList(Track.start(now.minus(Duration.standardSeconds(5))).stop(now)));
+        new TracksList(asList(Track.start(now.minus(Duration.standardSeconds(5))).stop(now)));
     }
 }
