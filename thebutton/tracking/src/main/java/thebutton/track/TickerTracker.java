@@ -27,7 +27,7 @@ import org.joda.time.LocalDate;
 
 import java.util.*;
 
-public class TickerTracker implements TimeTracker {
+public class TickerTracker implements TimeTracker, Ticker {
     private final Clock clock;
     private Deque<ButtonTick> ticks;
 
@@ -41,6 +41,7 @@ public class TickerTracker implements TimeTracker {
         return sumUpDay(new LocalDate(clock.now()));
     }
 
+    @Override
     public void tick() {
         ticks.add(new ButtonTick(clock.now()));
     }
@@ -102,6 +103,7 @@ public class TickerTracker implements TimeTracker {
         }
     }
 
+    @Override
     public void tick(String taskname) {
         ticks.add(new ButtonTick(clock.now(), taskname));
     }

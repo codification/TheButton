@@ -26,7 +26,7 @@ import java.io.IOException;
 
 public class ButtonFrame extends JFrame {
     private final TickerTracker timeTracker;
-    private IntervalsTableModel tracksModel;
+    private TracksTableModel tracksModel;
     private JButton button;
     private JTextField sinceStarted;
 
@@ -128,7 +128,7 @@ public class ButtonFrame extends JFrame {
     }
 
     private JTable createTracks() {
-        tracksModel = new IntervalsTableModel(resources, timeTracker, timeFormat);
+        tracksModel = new TracksTableModel(resources, timeTracker, timeFormat);
         final JTable trackTable = new JTable(tracksModel);
         trackTable.setName("the.track");
         trackTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
