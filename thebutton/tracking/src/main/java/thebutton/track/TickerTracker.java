@@ -69,7 +69,7 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     private void startTracking(Instant now) {
         ongoingTrack = start(now);
-        if (!hasBeenStarted()) {
+        if (!everBeenStarted()) {
             firstTick = now;
         }
     }
@@ -95,14 +95,14 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public Duration sinceStarted() {
-        if (!hasBeenStarted()) {
-            return Duration.ZERO;
-        } else {
+        if (everBeenStarted()) {
             return new Interval(veryFirst(), clock.now()).toDuration();
+        } else {
+            return Duration.ZERO;
         }
     }
 
-    private boolean hasBeenStarted() {
+    private boolean everBeenStarted() {
         return firstTick != null;
     }
 
