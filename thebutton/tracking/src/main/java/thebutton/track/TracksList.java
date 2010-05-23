@@ -17,6 +17,7 @@ import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.Duration;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class TracksList implements Tracks {
@@ -24,6 +25,10 @@ public class TracksList implements Tracks {
 
     public TracksList(List<Track> tracks) {
         this.tracks = tracks;
+    }
+
+    public TracksList() {
+        this.tracks = new LinkedList<Track>();
     }
 
     @Override

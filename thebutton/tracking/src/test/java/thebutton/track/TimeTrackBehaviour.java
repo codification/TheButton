@@ -39,8 +39,8 @@ public class TimeTrackBehaviour {
         assertThat(tracker.todays().count(), is(periodCount));
     }
 
-    private void assertTodaysDuration(Duration zero) {
-        assertThat(tracker.sumUpToday(), is(zero));
+    private void assertTodaysDuration(Duration duration) {
+        assertThat(tracker.sumUpToday(), is(duration));
     }
 
     @Test

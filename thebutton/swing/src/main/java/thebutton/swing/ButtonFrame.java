@@ -13,6 +13,7 @@
 
 package thebutton.swing;
 
+import thebutton.track.Ticker;
 import thebutton.track.TickerTracker;
 import thebutton.track.TimeFormat;
 import thebutton.track.TimeTracker;
@@ -25,7 +26,7 @@ import java.io.IOError;
 import java.io.IOException;
 
 public class ButtonFrame extends JFrame {
-    private final TickerTracker timeTracker;
+    private final TimeTracker timeTracker;
     private TracksTableModel tracksModel;
     private JButton button;
     private JTextField sinceStarted;
@@ -33,11 +34,13 @@ public class ButtonFrame extends JFrame {
     private final TimeFormat timeFormat = new TimeFormat();
     private ButtonResources resources;
     private JTextField taskField;
+    private final Ticker ticker;
 
-    public ButtonFrame(TickerTracker timeTracker, Timer timer, ButtonResources resources) throws HeadlessException {
+    public ButtonFrame(TickerTracker timeTracker, Ticker ticker, Timer timer, ButtonResources resources) throws HeadlessException {
         super("");
         this.resources = resources;
         this.timeTracker = timeTracker;
+        this.ticker = ticker;
         timer.addActionListener(updateAction());
 
         try {
@@ -128,7 +131,9 @@ public class ButtonFrame extends JFrame {
     }
 
     private JTable createTracks() {
-        tracksModel = new TracksTableModel(resources, timeTracker, timeFormat);
+        tracksModel = new TracksTableModel(resources, timeFormat);
+        timeTracker.setTrackFollower(tracksModel);
+
         final JTable trackTable = new JTable(tracksModel);
         trackTable.setName("the.track");
         trackTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -153,7 +158,7 @@ public class ButtonFrame extends JFrame {
     }
 
     private void buttonPushed() {
-        timeTracker.tick(taskField.getText());
+        ticker.tick(taskField.getText());
         tracksModel.fireTableDataChanged();
         updateTime();
     }

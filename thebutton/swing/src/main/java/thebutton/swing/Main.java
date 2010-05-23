@@ -18,7 +18,7 @@ import thebutton.track.TickerTracker;
 
 import javax.swing.*;
 
-import static thebutton.swing.ButtonResources.createResources;
+import static thebutton.swing.BundledResources.createResources;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, IllegalAccessException, InstantiationException {
@@ -30,7 +30,7 @@ public class Main {
     }
 
     public static ButtonFrame createFrame(TickerTracker timeTracker, Timer timer) {
-        final ButtonFrame buttonFrame = new ButtonFrame(timeTracker, timer, createResources());
+        final ButtonFrame buttonFrame = new ButtonFrame(timeTracker, timeTracker, timer, createResources());
         buttonFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         buttonFrame.pack();
         setLookAndFeel();

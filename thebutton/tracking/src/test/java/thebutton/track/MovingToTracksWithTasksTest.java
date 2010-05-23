@@ -17,7 +17,7 @@ import static org.hamcrest.core.Is.is;
  * @author: aavisv
  * @created: 2010-05-20 2:55:02 PM
  */
-public class TickerTrackerTest {
+public class MovingToTracksWithTasksTest {
     private TestingClock clock;
     private TickerTracker tickerTracker;
     private Tracks tracks;

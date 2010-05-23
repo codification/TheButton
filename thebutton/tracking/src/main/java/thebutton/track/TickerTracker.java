@@ -32,16 +32,21 @@ import static thebutton.track.Track.start;
 public class TickerTracker implements TimeTracker, Ticker {
     private final Clock clock;
     private Deque<ButtonTick> ticks;
-    private Tracks tracks;
+    private TrackFollower trackFollower = TrackFollower.NULL;
 
     public TickerTracker(Clock clock) {
         this.clock = clock;
         ticks = new LinkedList<ButtonTick>();
     }
 
-    public TickerTracker(Clock clock, Tracks tracks) {
+    public TickerTracker(Clock clock, TrackFollower trackFollower) {
         this(clock);
-        this.tracks = tracks;
+        this.trackFollower = trackFollower;
+    }
+
+    @Override
+    public void setTrackFollower(TrackFollower trackFollower) {
+        this.trackFollower = trackFollower;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class TickerTracker implements TimeTracker, Ticker {
     public void tick() {
         final Instant now = clock.now();
         if (isTracking()) {
-            tracks.add(start(ticks.peekLast().time()).stop(now));
+            trackFollower.add(start(ticks.peekLast().time()).stop(now));
         }
         ticks.add(new ButtonTick(now));
     }
@@ -119,7 +124,7 @@ public class TickerTracker implements TimeTracker, Ticker {
     public void tick(String taskname) {
         final Instant now = clock.now();
         if (isTracking()) {
-            tracks.add(start(ticks.peekLast().time()).doing(taskname).stop(now));
+            trackFollower.add(start(ticks.peekLast().time()).doing(taskname).stop(now));
         }
         ticks.add(new ButtonTick(now, taskname));
     }

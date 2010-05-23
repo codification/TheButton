@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static thebutton.swing.ButtonResources.BUTTON_FRAME_TITLE;
+import static thebutton.swing.BundledResources.BUTTON_FRAME_TITLE;
 
 /**
  * @author: aavisv
@@ -46,11 +46,11 @@ public class ButtonResourcesTest {
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        englishResources = new ButtonResources(new TestingResourceBundle(
+        englishResources = new BundledResources(new TestingResourceBundle(
                 resource(BUTTON_FRAME_TITLE, "The Button"),
                 resource("button.button.title.idle", "Idle")
         ));
-        germanResources = new ButtonResources(new TestingResourceBundle(
+        germanResources = new BundledResources(new TestingResourceBundle(
                 resource(BUTTON_FRAME_TITLE, "Der Druckknopf"),
                 resource("button.button.title.idle", "Frei")
         ));

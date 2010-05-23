@@ -7,8 +7,8 @@ import org.fest.swing.edt.GuiQuery;
 import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.*;
 import org.joda.time.Duration;
+import thebutton.swing.BundledResources;
 import thebutton.swing.ButtonFrame;
-import thebutton.swing.ButtonResources;
 import thebutton.swing.Main;
 import thebutton.track.TestingClock;
 import thebutton.track.TickerTracker;
@@ -28,7 +28,7 @@ public class ButtonApplicationTester {
     public ButtonApplicationTester() {
         clock = new TestingClock();
         timeTracker = new TickerTracker(clock);
-        resourceBundle = ButtonResources.lookupResources();
+        resourceBundle = BundledResources.lookupResources();
         frame = GuiActionRunner.execute(new GuiQuery<ButtonFrame>() {
             @Override
             protected ButtonFrame executeInEDT() {
@@ -66,7 +66,7 @@ public class ButtonApplicationTester {
     }
 
     public String idleCaption() {
-        return resourceBundle.getString(ButtonResources.BUTTON_BUTTON_IDLE);
+        return resourceBundle.getString(BundledResources.BUTTON_BUTTON_IDLE);
     }
 
     public void clickTheButton() {
