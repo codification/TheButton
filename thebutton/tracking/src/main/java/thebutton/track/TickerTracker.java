@@ -23,11 +23,13 @@ import org.apache.commons.collections.Closure;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
-import org.joda.time.LocalDate;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import static thebutton.track.Track.start;
+import static thebutton.track.OngoingTrack.start;
 
 public class TickerTracker implements TimeTracker, Ticker {
     private final Clock clock;
@@ -50,22 +52,12 @@ public class TickerTracker implements TimeTracker, Ticker {
     }
 
     @Override
-    public Duration sumUpToday() {
-        return sumUpDay(new LocalDate(clock.now()));
-    }
-
-    @Override
     public void tick() {
         final Instant now = clock.now();
         if (isTracking()) {
             trackFollower.add(start(ticks.peekLast().time()).stop(now));
         }
         ticks.add(new ButtonTick(now));
-    }
-
-    @Override
-    public Duration sumUpDay(LocalDate date) {
-        return tracksFor(date).totalDuration();
     }
 
     private void iterateTicksAsIntervals(Closure closure, Collection<ButtonTick> ticks) {
@@ -77,19 +69,6 @@ public class TickerTracker implements TimeTracker, Ticker {
                 closure.execute(start(startTick).doing(endtick.task()).stop(endtick.time()));
             }
         }
-    }
-
-    @Override
-    public Tracks todays() {
-        final LocalDate today = new LocalDate(clock.now());
-        return tracksFor(today);
-    }
-
-    @Override
-    public Tracks tracksFor(LocalDate date) {
-        final List<Track> intervals = new LinkedList<Track>();
-        iterateTicksAsIntervals(new IntervalsInADay(date, intervals), ticks);
-        return new TracksList(intervals);
     }
 
     @Override
@@ -127,25 +106,6 @@ public class TickerTracker implements TimeTracker, Ticker {
             trackFollower.add(start(ticks.peekLast().time()).doing(taskname).stop(now));
         }
         ticks.add(new ButtonTick(now, taskname));
-    }
-
-    private static class IntervalsInADay implements Closure {
-        private final LocalDate day;
-        private final Collection<Track> intervals;
-
-        public IntervalsInADay(LocalDate day, Collection<Track> intervals) {
-            this.day = day;
-            this.intervals = intervals;
-        }
-
-        @Override
-        public void execute(Object input) {
-            Track track = (Track) input;
-            final Interval interval = track.interval();
-            if (day.toInterval().contains(interval)) {
-                intervals.add(track);
-            }
-        }
     }
 
     private class ButtonTick {

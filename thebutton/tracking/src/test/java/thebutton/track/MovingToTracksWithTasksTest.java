@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.argThat;
 
 /**
  * @author: aavisv
@@ -21,6 +22,7 @@ public class MovingToTracksWithTasksTest {
     private TestingClock clock;
     private TickerTracker tickerTracker;
     private Tracks tracks;
+    private TrackFollower trackFollower;
 
     @Test
     public void
@@ -28,10 +30,7 @@ public class MovingToTracksWithTasksTest {
         tickerTracker.tick();
         String taskname = "myTask";
         tickerTracker.tick(taskname);
-
-        Tracks tracks = tickerTracker.todays();
-        assertThat(tracks.count(), is(1));
-        assertThat(tracks.first(), hasTask(taskname));
+        Mockito.verify(trackFollower).add(argThat(hasTask(taskname)));
 
     }
 
@@ -67,6 +66,8 @@ public class MovingToTracksWithTasksTest {
         clock = new TestingClock();
         tickerTracker = new TickerTracker(clock);
         tracks = Mockito.mock(Tracks.class);
+        trackFollower = Mockito.mock(TrackFollower.class);
+        tickerTracker.setTrackFollower(trackFollower);
     }
 
     private Matcher<Track> hasTask(final String taskname) {

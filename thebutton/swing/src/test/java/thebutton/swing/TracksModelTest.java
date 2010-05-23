@@ -4,6 +4,7 @@ import org.joda.time.Instant;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import thebutton.track.OngoingTrack;
 import thebutton.track.TimeFormat;
 import thebutton.track.Track;
 
@@ -13,7 +14,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.joda.time.Duration.standardSeconds;
 import static org.mockito.Mockito.when;
 import static thebutton.swing.TrackTableColumn.*;
-import static thebutton.track.Track.start;
+import static thebutton.track.OngoingTrack.start;
 
 /**
  * @author: aavisv
@@ -49,8 +50,8 @@ public class TracksModelTest {
     public void
     laysOutTrack() throws Exception {
         tableModel.add(track);
-        assertThat((String) tableModel.getValueAt(0, 0), equalTo(formatter.timeOfDay(track.start())));
-        assertThat((String) tableModel.getValueAt(0, 1), equalTo(formatter.timeOfDay(track.stop())));
+        assertThat((String) tableModel.getValueAt(0, 0), equalTo(formatter.timeOfDay(track.startsAt())));
+        assertThat((String) tableModel.getValueAt(0, 1), equalTo(formatter.timeOfDay(track.endsAt())));
         assertThat((String) tableModel.getValueAt(0, 2), equalTo(task));
     }
 
@@ -59,7 +60,7 @@ public class TracksModelTest {
     returnsLastTrack() throws Exception {
         tableModel.add(track);
         assertThat(tableModel.last(), is(track));
-        final Track anotherTrack = Track.start(new Instant()).stop(new Instant());
+        final Track anotherTrack = OngoingTrack.start(new Instant()).stop(new Instant());
         tableModel.add(anotherTrack);
         assertThat(tableModel.last(), is(anotherTrack));
     }

@@ -1,7 +1,6 @@
 package thebutton.track;
 
 import org.joda.time.DateTime;
-import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.ReadableDuration;
 
@@ -26,38 +25,16 @@ public class Track {
         return task;
     }
 
-    public static TrackBuilder start(Instant start) {
-        return new TrackBuilder(start);
-    }
-
     public Interval interval() {
         return interval;
     }
 
-    public DateTime start() {
+    public DateTime startsAt() {
         return interval.getStart();
     }
 
-    public DateTime stop() {
+    public DateTime endsAt() {
         return interval.getEnd();
-    }
-
-    public static class TrackBuilder {
-        private Instant start;
-        private String task = "";
-
-        public TrackBuilder(Instant start) {
-            this.start = start;
-        }
-
-        public Track stop(Instant end) {
-            return new Track(new Interval(start, end), task);
-        }
-
-        public TrackBuilder doing(String task) {
-            this.task = task;
-            return this;
-        }
     }
 
     @Override

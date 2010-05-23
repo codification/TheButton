@@ -13,75 +13,71 @@
 
 package thebutton.track;
 
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.joda.time.Duration;
-import org.joda.time.LocalDate;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.joda.time.Duration.*;
+import static org.joda.time.Duration.standardHours;
+import static org.joda.time.Duration.standardMinutes;
+import static org.mockito.Mockito.*;
 
 public class TimeTrackBehaviour {
     private TickerTracker tracker;
     private TestingClock clock;
     private Duration fiveMinutes;
     private Duration fiveSeconds;
-
-    @Test
-    public void noTimeTrackedWhenNotTicked() {
-        assertTodaysDuration(Duration.ZERO);
-        final int periodCount = 0;
-        assertPeriodsCount(periodCount);
-    }
-
-    private void assertPeriodsCount(int periodCount) {
-        assertThat(tracker.todays().count(), is(periodCount));
-    }
-
-    private void assertTodaysDuration(Duration duration) {
-        assertThat(tracker.sumUpToday(), is(duration));
-    }
+    private TrackFollower follower;
 
     @Test
     public void noTimeTrackedForOneTick() {
         tracker.tick();
-        assertTodaysDuration(Duration.ZERO);
-        assertPeriodsCount(0);
+        assertThatNoTracksWereCreated();
+    }
+
+    private void assertThatNoTracksWereCreated() {
+        verifyZeroInteractions(follower);
     }
 
     @Test
     public void trackOneHour() {
         tracker.tick();
-        clock.advance(standardHours(1));
+        final Duration duration = standardHours(1);
+        clock.advance(duration);
         tracker.tick();
-        assertTodaysDuration(standardHours(1));
-        assertPeriodsCount(1);
+        verify(follower).add(Mockito.argThat(aTrackWithDuration(duration)));
     }
 
     @Test
     public void trackTwoIntervals() {
         tracker.tick();
-        clock.advance(standardHours(1).plus(standardMinutes(30)));
+        final Duration firstDuration = standardHours(1).plus(standardMinutes(30));
+        clock.advance(firstDuration);
         tracker.tick();
         tracker.tick();
-        clock.advance(standardMinutes(30));
+        final Duration secondDuration = standardMinutes(30);
+        clock.advance(secondDuration);
         tracker.tick();
-        assertTodaysDuration(standardHours(2));
-        assertPeriodsCount(2);
+        verify(follower).add(Mockito.argThat(aTrackWithDuration(firstDuration)));
+        verify(follower).add(Mockito.argThat(aTrackWithDuration(secondDuration)));
     }
 
-    @Test
-    public void trackNiceDayOverlap() {
-        tracker.tick();
-        clock.advance(standardHours(2));
-        tracker.tick();
-        clock.advance(standardDays(1));
-        tracker.tick();
-        clock.advance(standardHours(1));
-        tracker.tick();
-        assertThat(tracker.sumUpDay(new LocalDate(clock.now())), is(standardHours(1)));
-        assertThat(tracker.sumUpDay(new LocalDate(clock.now().minus(standardDays(1)))), is(standardHours(2)));
+    private TypeSafeMatcher<Track> aTrackWithDuration(final Duration duration) {
+        return new TypeSafeMatcher<Track>() {
+            @Override
+            public boolean matchesSafely(Track track) {
+                return track.duration().equals(duration);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("a track with a duration of " + duration);
+            }
+        };
     }
 
     @Test
@@ -124,5 +120,7 @@ public class TimeTrackBehaviour {
         tracker = new TickerTracker(clock);
         fiveMinutes = Duration.standardMinutes(5);
         fiveSeconds = Duration.standardSeconds(5);
+        follower = mock(TrackFollower.class);
+        tracker.setTrackFollower(follower);
     }
 }

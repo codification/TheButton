@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.joda.time.Duration.standardSeconds;
-import static thebutton.track.Track.start;
+import static thebutton.track.OngoingTrack.start;
 
 /**
  * @author: aavisv

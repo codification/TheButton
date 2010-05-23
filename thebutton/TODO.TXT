@@ -8,9 +8,8 @@ Improvements:
         
 
 Features:
-     - Add a (optional) subject/title to each track
+     - Configure track length (á la pomodoro)
+     - Add notification/blink when preconfigured track length is reached
      - Save/Persist tracks
      - Re-read saved tracks
      - Configure filtering of tracks (today, subject)
-     - Configure track length (á la pomodoro)
-     - Add notification/blink when preconfigured track length is reached

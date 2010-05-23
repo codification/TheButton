@@ -45,10 +45,10 @@ class TracksTableModel extends AbstractTableModel implements TrackFollower, Trac
     public Object getValueAt(int rowIndex, int columnIndex) {
         final Track track = tracks().track(rowIndex);
         if (columnIndex == 0) {
-            final DateTime startingInstant = track.start();
+            final DateTime startingInstant = track.startsAt();
             return timeFormatter.timeOfDay(startingInstant);
         } else if (columnIndex == 1) {
-            final DateTime endingInstant = track.stop();
+            final DateTime endingInstant = track.endsAt();
             return timeFormatter.timeOfDay(endingInstant);
         } else {
             return track.task();
