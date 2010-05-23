@@ -5,7 +5,7 @@ Improvements:
         - Time string formatting and tracks to be less cumbersome
         - Eliminate the widespread dependencies on yoda time (should only be used by the core tracking func.)
         - "Total time in completed tracks" instead of "since started"
-        
+        - TrackPrinter or some such for things like timeFormatter.timeOfDay(track.startsAt())        
 
 Features:
      - Configure track length (á la pomodoro)

@@ -19,26 +19,22 @@
  */
 package thebutton.track;
 
-import org.apache.commons.collections.Closure;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
-
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import static thebutton.track.OngoingTrack.start;
 
 public class TickerTracker implements TimeTracker, Ticker {
     private final Clock clock;
-    private Deque<ButtonTick> ticks;
     private TrackFollower trackFollower = TrackFollower.NULL;
+    private OngoingTrack ongoingTrack;
+    private Instant firstTick;
 
     public TickerTracker(Clock clock) {
         this.clock = clock;
-        ticks = new LinkedList<ButtonTick>();
+        ongoingTrack = null;
+        firstTick = null;
     }
 
     public TickerTracker(Clock clock, TrackFollower trackFollower) {
@@ -53,21 +49,28 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public void tick() {
-        final Instant now = clock.now();
-        if (isTracking()) {
-            trackFollower.add(start(ticks.peekLast().time()).stop(now));
-        }
-        ticks.add(new ButtonTick(now));
+        tick(OngoingTrack.NO_TASK);
     }
 
-    private void iterateTicksAsIntervals(Closure closure, Collection<ButtonTick> ticks) {
-        final Iterator<ButtonTick> iterator = ticks.iterator();
-        while (iterator.hasNext()) {
-            final Instant startTick = iterator.next().time();
-            if (iterator.hasNext()) {
-                ButtonTick endtick = iterator.next();
-                closure.execute(start(startTick).doing(endtick.task()).stop(endtick.time()));
-            }
+    @Override
+    public void tick(String taskname) {
+        final Instant now = clock.now();
+        if (isIdle()) {
+            startTracking(now);
+        } else {
+            stopTracking(taskname, now);
+        }
+    }
+
+    private void stopTracking(String taskname, Instant now) {
+        trackFollower.add(ongoingTrack.doing(taskname).stop(now));
+        ongoingTrack = null;
+    }
+
+    private void startTracking(Instant now) {
+        ongoingTrack = start(now);
+        if (!hasBeenStarted()) {
+            firstTick = now;
         }
     }
 
@@ -76,13 +79,13 @@ public class TickerTracker implements TimeTracker, Ticker {
         if (isIdle()) {
             return Duration.ZERO;
         } else {
-            return new Interval(ticks.getLast().time(), clock.now()).toDuration();
+            return new Interval(ongoingTrack.startsAt(), clock.now()).toDuration();
         }
     }
 
     @Override
     public boolean isIdle() {
-        return ticks.size() % 2 == 0;
+        return ongoingTrack == null;
     }
 
     @Override
@@ -92,41 +95,19 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public Duration sinceStarted() {
-        if (ticks.isEmpty()) {
+        if (!hasBeenStarted()) {
             return Duration.ZERO;
         } else {
-            return new Interval(ticks.getFirst().time(), clock.now()).toDuration();
+            return new Interval(veryFirst(), clock.now()).toDuration();
         }
     }
 
-    @Override
-    public void tick(String taskname) {
-        final Instant now = clock.now();
-        if (isTracking()) {
-            trackFollower.add(start(ticks.peekLast().time()).doing(taskname).stop(now));
-        }
-        ticks.add(new ButtonTick(now, taskname));
+    private boolean hasBeenStarted() {
+        return firstTick != null;
     }
 
-    private class ButtonTick {
-        private Instant instant;
-        private String task;
-
-        private ButtonTick(Instant instant) {
-            this(instant, "");
-        }
-
-        public ButtonTick(Instant instant, String taskname) {
-            this.instant = instant;
-            task = taskname;
-        }
-
-        public Instant time() {
-            return instant;
-        }
-
-        public String task() {
-            return task;
-        }
+    private Instant veryFirst() {
+        return firstTick;
     }
+
 }

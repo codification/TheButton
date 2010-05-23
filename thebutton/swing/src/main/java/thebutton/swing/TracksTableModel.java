@@ -1,6 +1,5 @@
 package thebutton.swing;
 
-import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import thebutton.track.*;
 
@@ -45,11 +44,9 @@ class TracksTableModel extends AbstractTableModel implements TrackFollower, Trac
     public Object getValueAt(int rowIndex, int columnIndex) {
         final Track track = tracks().track(rowIndex);
         if (columnIndex == 0) {
-            final DateTime startingInstant = track.startsAt();
-            return timeFormatter.timeOfDay(startingInstant);
+            return timeFormatter.timeOfDay(track.startsAt());
         } else if (columnIndex == 1) {
-            final DateTime endingInstant = track.endsAt();
-            return timeFormatter.timeOfDay(endingInstant);
+            return timeFormatter.timeOfDay(track.endsAt());
         } else {
             return track.task();
         }
