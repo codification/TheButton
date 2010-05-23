@@ -158,7 +158,7 @@ public class ButtonFrame extends JFrame {
     }
 
     private void buttonPushed() {
-        ticker.tick(taskField.getText());
+        ticker.toc(taskField.getText());
         tracksModel.fireTableDataChanged();
         updateTime();
     }

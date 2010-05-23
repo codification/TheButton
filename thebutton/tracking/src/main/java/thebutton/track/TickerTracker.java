@@ -48,12 +48,12 @@ public class TickerTracker implements TimeTracker, Ticker {
     }
 
     @Override
-    public void tick() {
-        tick(OngoingTrack.NO_TASK);
+    public void tic() {
+        toc(OngoingTrack.NO_TASK);
     }
 
     @Override
-    public void tick(String taskname) {
+    public void toc(String taskname) {
         final Instant now = clock.now();
         if (isIdle()) {
             startTracking(now);

@@ -27,9 +27,9 @@ public class MovingToTracksWithTasksTest {
     @Test
     public void
     setsTaskNameForNewTrack() {
-        tickerTracker.tick();
+        tickerTracker.tic();
         String taskname = "myTask";
-        tickerTracker.tick(taskname);
+        tickerTracker.toc(taskname);
         Mockito.verify(trackFollower).add(argThat(hasTask(taskname)));
 
     }
@@ -38,10 +38,10 @@ public class MovingToTracksWithTasksTest {
     public void
     knowsWhenItsIdle() throws Exception {
         assertThat("is idle", tickerTracker.isIdle(), is(true));
-        tickerTracker.tick();
+        tickerTracker.tic();
         assertThat("is not idle", tickerTracker.isIdle(), is(false));
         assertThat("is running", tickerTracker.isTracking(), is(true));
-        tickerTracker.tick();
+        tickerTracker.tic();
         assertThat("is idle", tickerTracker.isIdle(), is(true));
     }
 
@@ -49,11 +49,11 @@ public class MovingToTracksWithTasksTest {
     public void
     addsTracks() throws Exception {
         final TickerTracker tracksTracker = new TickerTracker(clock, tracks);
-        tracksTracker.tick();
+        tracksTracker.tic();
         final Duration duration = Duration.standardSeconds(5);
         clock.advance(duration);
         final String task = "sth";
-        tracksTracker.tick(task);
+        tracksTracker.toc(task);
         final ArgumentCaptor<Track> captor = ArgumentCaptor.forClass(Track.class);
         Mockito.verify(tracks).add(captor.capture());
         assertThat("with duration", (Duration) captor.getValue().duration(), IsEqual.equalTo(duration));

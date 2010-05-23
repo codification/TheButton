@@ -35,7 +35,7 @@ public class TimeTrackBehaviour {
 
     @Test
     public void noTimeTrackedForOneTick() {
-        tracker.tick();
+        tracker.tic();
         assertThatNoTracksWereCreated();
     }
 
@@ -45,23 +45,23 @@ public class TimeTrackBehaviour {
 
     @Test
     public void trackOneHour() {
-        tracker.tick();
+        tracker.tic();
         final Duration duration = standardHours(1);
         clock.advance(duration);
-        tracker.tick();
+        tracker.tic();
         verify(follower).add(Mockito.argThat(aTrackWithDuration(duration)));
     }
 
     @Test
     public void trackTwoIntervals() {
-        tracker.tick();
+        tracker.tic();
         final Duration firstDuration = standardHours(1).plus(standardMinutes(30));
         clock.advance(firstDuration);
-        tracker.tick();
-        tracker.tick();
+        tracker.tic();
+        tracker.tic();
         final Duration secondDuration = standardMinutes(30);
         clock.advance(secondDuration);
-        tracker.tick();
+        tracker.tic();
         verify(follower).add(Mockito.argThat(aTrackWithDuration(firstDuration)));
         verify(follower).add(Mockito.argThat(aTrackWithDuration(secondDuration)));
     }
@@ -82,7 +82,7 @@ public class TimeTrackBehaviour {
 
     @Test
     public void currentTrackLength() {
-        tracker.tick();
+        tracker.tic();
         clock.advance(fiveSeconds);
         assertThat(tracker.runningTime(), is(fiveSeconds));
     }
@@ -94,16 +94,16 @@ public class TimeTrackBehaviour {
 
     @Test
     public void timeSinceStartOnOneClick() {
-        tracker.tick();
+        tracker.tic();
         clock.advance(fiveMinutes);
         assertThat(tracker.sinceStarted(), is(fiveMinutes));
     }
 
     @Test
     public void timeSinceStartOnTwoClicks() {
-        tracker.tick();
+        tracker.tic();
         clock.advance(fiveMinutes);
-        tracker.tick();
+        tracker.tic();
         clock.advance(fiveMinutes);
         assertThat(tracker.sinceStarted(), is(fiveMinutes.plus(fiveMinutes)));
     }
