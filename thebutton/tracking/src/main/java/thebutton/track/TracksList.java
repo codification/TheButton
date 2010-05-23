@@ -58,6 +58,10 @@ public class TracksList implements Tracks {
         tracks.add(o);
     }
 
+    public Track last() {
+        return tracks.get(tracks.size() - 1);
+    }
+
     private static class DurationAggregatingClosure implements Closure {
         private Duration result;
 

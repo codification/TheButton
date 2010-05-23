@@ -5,7 +5,6 @@ import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import thebutton.track.TimeFormat;
-import thebutton.track.TimeTracker;
 import thebutton.track.Track;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +19,7 @@ import static thebutton.track.Track.start;
  * @author: aavisv
  * @created: 2010-05-21 6:01:28 PM
  */
-public class TableModelTest {
+public class TracksModelTest {
     private ButtonResources buttonResources;
     private TracksTableModel tableModel;
     private Track track;
@@ -30,9 +29,7 @@ public class TableModelTest {
     @Test
     public void
     addsTrack() {
-
         tableModel.add(track);
-
         assertThat("row count", tableModel.getRowCount(), is(1));
     }
 
@@ -51,18 +48,25 @@ public class TableModelTest {
     @Test
     public void
     laysOutTrack() throws Exception {
-
         tableModel.add(track);
         assertThat((String) tableModel.getValueAt(0, 0), equalTo(formatter.timeOfDay(track.start())));
         assertThat((String) tableModel.getValueAt(0, 1), equalTo(formatter.timeOfDay(track.stop())));
         assertThat((String) tableModel.getValueAt(0, 2), equalTo(task));
     }
 
+    @Test
+    public void
+    returnsLastTrack() throws Exception {
+        tableModel.add(track);
+        assertThat(tableModel.last(), is(track));
+        final Track anotherTrack = Track.start(new Instant()).stop(new Instant());
+        tableModel.add(anotherTrack);
+        assertThat(tableModel.last(), is(anotherTrack));
+    }
+
     @BeforeMethod
     public void createModel() {
-
         buttonResources = Mockito.mock(ButtonResources.class);
-        TimeTracker timeTracker = Mockito.mock(TimeTracker.class);
         formatter = new TimeFormat();
         tableModel = new TracksTableModel(buttonResources, formatter);
         Instant start = new Instant();

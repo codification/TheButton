@@ -8,6 +8,8 @@ import thebutton.uitest.harness.ButtonBehaviourBase;
  * @created: 2010-05-20 12:41:44 PM
  */
 public class TrackTaskBehaviour extends ButtonBehaviourBase {
+    private static final String TASK = "fun";
+
     @Test
     public void
     hasAColumnForTaskName() {
@@ -23,13 +25,13 @@ public class TrackTaskBehaviour extends ButtonBehaviourBase {
     @Test
     public void
     canEnterTaskName() throws Exception {
-        app.enterTaskName("have some fun");
+        app.enterTaskName(TASK);
     }
 
     @Test
     public void
     taskNameAppearsInTrackRowInTheCorrectColumn() throws Exception {
-        String task = "have some fun";
+        String task = TASK;
         app.enterTaskName(task);
         app.clickTheButton();
         app.fiveSecondsPass();

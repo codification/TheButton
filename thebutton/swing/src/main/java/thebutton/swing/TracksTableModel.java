@@ -1,6 +1,7 @@
 package thebutton.swing;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import thebutton.track.*;
 
 import javax.swing.table.AbstractTableModel;
@@ -14,7 +15,7 @@ import static thebutton.swing.TrackTableColumn.numberOfColumns;
  * @author: aavisv
  * @created: 2010-05-17 9:57:52 PM
  */
-class TracksTableModel extends AbstractTableModel implements TrackFollower {
+class TracksTableModel extends AbstractTableModel implements TrackFollower, Tracks {
     private final ButtonResources resources;
     private TimeFormat timeFormatter;
     private TracksList tracksList;
@@ -61,5 +62,29 @@ class TracksTableModel extends AbstractTableModel implements TrackFollower {
     @Override
     public void add(Track o) {
         tracksList.add(o);
+    }
+
+    @Override
+    public int count() {
+        return tracksList.count();
+    }
+
+    @Override
+    public Duration totalDuration() {
+        return tracksList.totalDuration();
+    }
+
+    @Override
+    public Track track(int trackNo) {
+        return tracksList.track(trackNo);
+    }
+
+    @Override
+    public Track first() {
+        return tracksList.first();
+    }
+
+    public Track last() {
+        return tracksList.last();
     }
 }

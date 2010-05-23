@@ -4,6 +4,7 @@ Improvements:
      - Refactor!
         - Time string formatting and tracks to be less cumbersome
         - Eliminate the widespread dependencies on yoda time (should only be used by the core tracking func.)
+        - "Total time in completed tracks" instead of "since started"
         
 
 Features:

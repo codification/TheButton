@@ -110,12 +110,12 @@ public class ButtonFrame extends JFrame {
     }
 
     public void updateTime() {
-        if (timeTracker.isTracking()) {
-            button.setText(runningTimeRepresentation());
-        } else {
+        if (timeTracker.isIdle()) {
             button.setText(resources.idle());
+        } else {
+            button.setText(runningTimeRepresentation());
         }
-        sinceStarted.setText(hoursAndMinutesSinceStarted());
+        sinceStarted.setText(totalDuration());
 
         button.repaint();
         sinceStarted.repaint();
@@ -126,7 +126,7 @@ public class ButtonFrame extends JFrame {
         return timeFormat.usingSeconds(timeTracker.runningTime());
     }
 
-    private String hoursAndMinutesSinceStarted() {
+    private String totalDuration() {
         return timeFormat.usingMinutes(timeTracker.sinceStarted());
     }
 
