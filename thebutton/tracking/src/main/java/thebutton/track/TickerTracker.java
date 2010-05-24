@@ -37,11 +37,6 @@ public class TickerTracker implements TimeTracker, Ticker {
         firstTick = null;
     }
 
-    public TickerTracker(Clock clock, TrackFollower trackFollower) {
-        this(clock);
-        this.trackFollower = trackFollower;
-    }
-
     @Override
     public void setTrackFollower(TrackFollower trackFollower) {
         this.trackFollower = trackFollower;
@@ -49,11 +44,11 @@ public class TickerTracker implements TimeTracker, Ticker {
 
     @Override
     public void tic() {
-        toc(OngoingTrack.NO_TASK);
+        tic(OngoingTrack.NO_TASK);
     }
 
     @Override
-    public void toc(String taskname) {
+    public void tic(String taskname) {
         final Instant now = clock.now();
         if (isIdle()) {
             startTracking(now);
@@ -86,11 +81,6 @@ public class TickerTracker implements TimeTracker, Ticker {
     @Override
     public boolean isIdle() {
         return ongoingTrack == null;
-    }
-
-    @Override
-    public boolean isTracking() {
-        return !isIdle();
     }
 
     @Override

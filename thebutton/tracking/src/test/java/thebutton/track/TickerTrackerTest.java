@@ -14,19 +14,21 @@
 package thebutton.track;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsEqual;
 import org.joda.time.Duration;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.joda.time.Duration.standardHours;
-import static org.joda.time.Duration.standardMinutes;
+import static org.joda.time.Duration.*;
 import static org.mockito.Mockito.*;
 
-public class TimeTrackBehaviour {
+public class TickerTrackerTest {
     private TickerTracker tracker;
     private TestingClock clock;
     private Duration fiveMinutes;
@@ -41,6 +43,16 @@ public class TimeTrackBehaviour {
 
     private void assertThatNoTracksWereCreated() {
         verifyZeroInteractions(follower);
+    }
+
+    @Test
+    public void
+    knowsWhenItsIdle() throws Exception {
+        assertThat("is idle", tracker.isIdle(), is(true));
+        tracker.tic();
+        assertThat("is not idle", tracker.isIdle(), is(false));
+        tracker.tic();
+        assertThat("is idle", tracker.isIdle(), is(true));
     }
 
     @Test
@@ -114,12 +126,50 @@ public class TimeTrackBehaviour {
         assertThat(tracker.runningTime(), is(Duration.ZERO));
     }
 
+    @Test
+    public void
+    setsTaskNameForNewTrack() {
+        tracker.tic();
+        String taskname = "myTask";
+        tracker.tic(taskname);
+        Mockito.verify(follower).add(argThat(hasTask(taskname)));
+
+    }
+
+    @Test
+    public void
+    addsTracks() throws Exception {
+        tracker.tic();
+        final Duration duration = standardSeconds(5);
+        clock.advance(duration);
+        final String task = "sth";
+        tracker.tic(task);
+        final ArgumentCaptor<Track> captor = ArgumentCaptor.forClass(Track.class);
+        Mockito.verify(follower).add(captor.capture());
+        assertThat("with duration", (Duration) captor.getValue().duration(), IsEqual.equalTo(duration));
+        assertThat("with task", captor.getValue().task(), IsEqual.equalTo(task));
+    }
+
+    private Matcher<Track> hasTask(final String taskname) {
+        return new TypeSafeMatcher<Track>() {
+            @Override
+            public boolean matchesSafely(Track track) {
+                return track.task().equals(taskname);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("a track with the task: " + taskname);
+            }
+        };
+    }
+
     @BeforeMethod
     protected void setUp() throws Exception {
         clock = new TestingClock();
         tracker = new TickerTracker(clock);
         fiveMinutes = Duration.standardMinutes(5);
-        fiveSeconds = Duration.standardSeconds(5);
+        fiveSeconds = standardSeconds(5);
         follower = mock(TrackFollower.class);
         tracker.setTrackFollower(follower);
     }

@@ -12,8 +12,6 @@ public interface TimeTracker {
 
     boolean isIdle();
 
-    boolean isTracking();
-
     Duration sinceStarted();
 
     void setTrackFollower(TrackFollower trackFollower);
